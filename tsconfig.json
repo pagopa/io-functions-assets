@@ -1,19 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "rootDir": ".",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "noImplicitAny": true,
-    "declaration": false,
-    "sourceMap": false,
-    "lib": []
-  },
-  "exclude": [
-    "__mocks__",
-    "dist",
-    "node_modules",
-    "src/**/__tests__/*"
-  ]
+    "target": "es6",
+    "outDir": "dist",
+    "rootDir": ".",
+    "sourceMap": true,
+    "strict": false
+  }, 
+  "exclude": ["__mocks__"]
 }
