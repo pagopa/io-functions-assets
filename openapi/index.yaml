@@ -1,49 +1,103 @@
 swagger: "2.0"
 info:
-  version: 1.1.0
-  title: IO Function API
+  version: 0.0.1
+  title: IO API for Public assets
   contact:
-    name: IO team
+    name: Digital Transformation Team
     url: https://forum.italia.it/c/progetto-io
   x-logo:
     url: https://io.italia.it/assets/img/io-logo-blue.svg
   description: >
-    Documentation of the IO Function API here.
+    # Warning
+
+    **This is an experimental API that is (most probably) going to change as we evolve the IO platform.**
+
+    # Introduction
+
+    This is the documentation of the IO API for App.
+
 host: api.cd.italia.it
-basePath: "/template"
+basePath: "/api/v1"
 schemes:
   - https
 paths:
-  "/echo/{input}":
-    parameters:
-      - name: input
-        in: path
-        type: string
-        required: true
-        description: test input.
+  "/services":
     get:
-      operationId: echo
-      summary: Echo API
-      description: Some API description here.
+      operationId: getVisibleServices
+      summary: GetVisibleServices.
+      description: |-
+        Returns all the services that have the 'is_visibile' field value set to true.
+      tags:
+        - restricted
       responses:
         "200":
           description: Found.
           schema:
-            "$ref": "#/definitions/Input"
+            $ref: "#/definitions/PaginatedServiceTupleCollection"
+        "401":
+          description: Unauthorized
+        "429":
+          description: Too many requests
+  "/services/{service_id}":
+    get:
+      operationId: getService
+      summary: GetService
+      description: A previously created service with the provided service ID is returned.
+      tags:
+        - restricted
+      parameters:
+        - name: service_id
+          in: path
+          type: string
+          required: true
+          description: The ID of an existing Service.
+      responses:
+        "200":
+          description: Service found.
+          schema:
+            "$ref": "#/definitions/ServicePublic"
           examples:
             application/json:
-              id: "10000AAAA"
-              output: "hello world !"
+              department_name: dept
+              organization_name: org
+              service_id: 2b3e728c1a5d1efa035c
+              service_name: service
+              version: 1
         "401":
           description: Unauthorized
         "404":
-          description: Not found.
-      parameters: []
+          description: No service found for the provided ID.
+        "429":
+          description: Too many requests
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  PaginationRequest:
+    name: cursor
+    in: query
+    type: string
+    minimum: 1
+    description: An opaque identifier that points to the next item in the collection.
+    x-example: 01BX9NSMKVXXS5PSP2FATZM123
 definitions:
-  Input:
-    type: object
-    properties:
-      id:
-        type: string
-      output:
-        type: string
+  PaginatedServiceTupleCollection:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+  ProblemJson:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ProblemJson"
+  ServicePublic:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServicePublic"
+  EmailAddress:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/EmailAddress"
+  FiscalCode:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/FiscalCode"
+  TimeToLiveSeconds:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+  Timestamp:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/Timestamp"
+  ServiceTupleCollection:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceTupleCollection"
+  PaginationResponse:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/PaginationResponse"
+ 
