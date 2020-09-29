@@ -1,7 +1,5 @@
 // tslint:disable:no-any
 
-import { none, some } from "fp-ts/lib/Option";
-
 import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 import {
   NonEmptyString,
@@ -19,13 +17,11 @@ import {
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
+import { right } from "fp-ts/lib/Either";
 import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
+import * as asyncI from "io-functions-commons/dist/src/utils/async";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
-import {
-  GetServiceHandler,
-  serviceAvailableNotificationChannels
-} from "../handler";
+import { GetServiceByRevisionHandler } from "../handler";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -61,12 +57,14 @@ const aNewService: NewService = {
   kind: "INewService"
 };
 
+const aVersion = 1 as NonNegativeInteger;
+
 const aRetrievedService: RetrievedService = {
   ...aNewService,
   ...aCosmosResourceMetadata,
   id: "123" as NonEmptyString,
   kind: "IRetrievedService",
-  version: 1 as NonNegativeInteger
+  version: aVersion
 };
 
 const aSeralizedService: ServicePublic = {
@@ -75,38 +73,49 @@ const aSeralizedService: ServicePublic = {
     NotificationChannelEnum.EMAIL,
     NotificationChannelEnum.WEBHOOK
   ],
-  version: 1 as NonNegativeInteger
+  version: aVersion
 };
 
-describe("serviceAvailableNotificationChannels", () => {
-  it("should return an array with the right notification channels", () => {
-    expect(serviceAvailableNotificationChannels(aRetrievedService)).toEqual([
-      NotificationChannelEnum.EMAIL,
-      NotificationChannelEnum.WEBHOOK
-    ]);
+const resultsMock: ReadonlyArray<any> = [[right(aRetrievedService)]];
 
-    expect(
-      serviceAvailableNotificationChannels({
-        ...aRetrievedService,
-        requireSecureChannels: true
-      })
-    ).toEqual([NotificationChannelEnum.WEBHOOK]);
-  });
-});
+const aServiceIteratorMock = {
+  next: jest.fn(() =>
+    Promise.resolve({
+      value: jest.fn(() => resultsMock)
+    })
+  )
+};
 
-describe("GetServiceHandler", () => {
-  it("should get an existing service", async () => {
+const anErrorServiceIteratorMock = {
+  next: jest.fn(() => Promise.reject("Error"))
+};
+
+const aFlattenAsyncIterableImpl = () => {
+  return {
+    [Symbol.asyncIterator]: () => aServiceIteratorMock
+  };
+};
+
+describe("GetServiceByRevisionHandler", () => {
+  it("should get an existing service by a given revision", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedService));
-      })
+      getQueryIterator: jest.fn(() => aServiceIteratorMock)
     };
+
+    jest
+      .spyOn(asyncI, "asyncIterableToArray")
+      .mockImplementationOnce(() =>
+        Promise.resolve([right(aRetrievedService)])
+      );
+    jest
+      .spyOn(asyncI, "flattenAsyncIterable")
+      .mockImplementationOnce(aFlattenAsyncIterableImpl);
     const aServiceId = "1" as NonEmptyString;
-    const getServiceHandler = GetServiceHandler(serviceModelMock as any);
-    const response = await getServiceHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
-      aServiceId
+    const getServiceByRevisionHandler = GetServiceByRevisionHandler(
+      serviceModelMock as any
     );
+    const response = await getServiceByRevisionHandler(aServiceId, aVersion);
+    expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSeralizedService);
@@ -114,30 +123,46 @@ describe("GetServiceHandler", () => {
   });
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
-        return fromLeft(none);
-      })
+      getQueryIterator: jest.fn(() => anErrorServiceIteratorMock)
     };
+
+    jest
+      .spyOn(asyncI, "asyncIterableToArray")
+      .mockImplementationOnce(() => Promise.reject("Error"));
+
+    jest.spyOn(asyncI, "flattenAsyncIterable").mockImplementationOnce(() => {
+      return {
+        [Symbol.asyncIterator]: () => anErrorServiceIteratorMock
+      };
+    });
     const aServiceId = "1" as NonEmptyString;
-    const getServiceHandler = GetServiceHandler(serviceModelMock as any);
-    const response = await getServiceHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
-      aServiceId
+    const getServiceByRevisionHandler = GetServiceByRevisionHandler(
+      serviceModelMock as any
     );
+    const response = await getServiceByRevisionHandler(aServiceId, aVersion);
+    expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(none);
-      })
+      getQueryIterator: jest.fn(() => aServiceIteratorMock)
     };
+    jest
+      .spyOn(asyncI, "asyncIterableToArray")
+      .mockImplementationOnce(() => Promise.resolve([]));
+
+    jest
+      .spyOn(asyncI, "flattenAsyncIterable")
+      .mockImplementationOnce(aFlattenAsyncIterableImpl);
     const aServiceId = "1" as NonEmptyString;
-    const getServiceHandler = GetServiceHandler(serviceModelMock as any);
-    const response = await getServiceHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
-      aServiceId
+    const getServiceByRevisionHandler = GetServiceByRevisionHandler(
+      serviceModelMock as any
     );
+    const response = await getServiceByRevisionHandler(
+      aServiceId,
+      999 as NonNegativeInteger
+    );
+    expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 });

@@ -28,22 +28,32 @@ import {
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
+import { rights } from "fp-ts/lib/Array";
+import { identity } from "fp-ts/lib/function";
+import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
 import {
   NotificationChannel,
   NotificationChannelEnum
 } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+import {
+  asyncIterableToArray,
+  flattenAsyncIterable
+} from "io-functions-commons/dist/src/utils/async";
+import { toCosmosErrorResponse } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
+import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
 
-type IGetServiceHandlerRet =
+type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
   | IResponseErrorNotFound
   | IResponseErrorQuery;
 
-type IGetServiceHandler = (
-  serviceId: ServiceId
-) => Promise<IGetServiceHandlerRet>;
+type IGetServiceByRevisionHandler = (
+  serviceId: ServiceId,
+  version: NonNegativeInteger
+) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
   retrievedService: RetrievedService
@@ -76,41 +86,67 @@ function retrievedServiceToPublic(
   };
 }
 
-/**
- * Extracts the serviceId value from the URL path parameter.
- */
-const requiredServiceIdMiddleware = RequiredParamMiddleware(
-  "serviceid",
-  NonEmptyString
-);
-
-export function GetServiceHandler(
-  serviceModel: ServiceModel
-): IGetServiceHandler {
-  return async serviceId =>
-    (await serviceModel.findLastVersionByModelId([serviceId]).run()).fold<
-      IGetServiceHandlerRet
-    >(
-      error => ResponseErrorQuery("Error while retrieving the service", error),
-      maybeService =>
-        maybeService.foldL<
-          IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
-        >(
-          () =>
-            ResponseErrorNotFound(
+const getServiceByRevisionTask = (
+  serviceModel: ServiceModel,
+  serviceId: ServiceId,
+  version: NonNegativeInteger
+) =>
+  tryCatch(
+    () =>
+      asyncIterableToArray(
+        flattenAsyncIterable(
+          serviceModel.getQueryIterator({
+            parameters: [
+              {
+                name: "@serviceId",
+                value: serviceId
+              },
+              {
+                name: "@version",
+                value: version
+              }
+            ],
+            query: `SELECT * FROM m WHERE m.serviceId = @serviceId and m.version = @version`
+          })
+        )
+      ),
+    toCosmosErrorResponse
+  )
+    .map(rights)
+    .chain(results =>
+      taskEither.of(
+        results.length > 0
+          ? ResponseSuccessJson(retrievedServiceToPublic(results[0]))
+          : ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
-            ),
-          service => ResponseSuccessJson(retrievedServiceToPublic(service))
-        )
+            )
+      )
     );
+
+export function GetServiceByRevisionHandler(
+  serviceModel: ServiceModel
+): IGetServiceByRevisionHandler {
+  return async (serviceId, version) =>
+    getServiceByRevisionTask(serviceModel, serviceId, version)
+      .fold<IGetServiceByRevisionHandlerRet>(
+        error =>
+          ResponseErrorQuery("Error while retrieving the service", error),
+        identity
+      )
+      .run();
 }
 
 /**
  * Wraps a GetService handler inside an Express request handler.
  */
-export function GetService(serviceModel: ServiceModel): express.RequestHandler {
-  const handler = GetServiceHandler(serviceModel);
-  const middlewaresWrap = withRequestMiddlewares(requiredServiceIdMiddleware);
+export function GetServiceByRevision(
+  serviceModel: ServiceModel
+): express.RequestHandler {
+  const handler = GetServiceByRevisionHandler(serviceModel);
+  const middlewaresWrap = withRequestMiddlewares(
+    RequiredParamMiddleware("serviceid", NonEmptyString),
+    RequiredParamMiddleware("version", NonNegativeInteger)
+  );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
