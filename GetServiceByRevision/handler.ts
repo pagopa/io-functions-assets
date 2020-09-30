@@ -29,22 +29,20 @@ import {
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
-import { rights } from "fp-ts/lib/Array";
 import { identity } from "fp-ts/lib/function";
-import { taskEither, tryCatch } from "fp-ts/lib/TaskEither";
+import { isSome } from "fp-ts/lib/Option";
+import { taskEither } from "fp-ts/lib/TaskEither";
 import {
   NotificationChannel,
   NotificationChannelEnum
 } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
-import {
-  asyncIterableToArray,
-  flattenAsyncIterable
-} from "io-functions-commons/dist/src/utils/async";
-import { toCosmosErrorResponse } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import {
+  IntegerFromString,
+  NonNegativeInteger
+} from "italia-ts-commons/lib/numbers";
 
 type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -53,7 +51,7 @@ type IGetServiceByRevisionHandlerRet =
 
 type IGetServiceByRevisionHandler = (
   serviceId: ServiceId,
-  version: NonEmptyString
+  version: NonNegativeInteger
 ) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
@@ -92,35 +90,25 @@ const getServiceByRevisionTask = (
   serviceId: ServiceId,
   version: NonNegativeInteger
 ) =>
-  tryCatch(
-    () =>
-      asyncIterableToArray(
-        flattenAsyncIterable(
-          serviceModel.getQueryIterator(
-            {
-              parameters: [
-                {
-                  name: "@serviceId",
-                  value: serviceId
-                },
-                {
-                  name: "@version",
-                  value: version
-                }
-              ],
-              query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
-            },
-            { maxItemCount: 1 }
-          )
-        )
-      ),
-    toCosmosErrorResponse
-  )
-    .map(rights)
-    .chain(results =>
+  serviceModel
+    .findOneByQuery({
+      parameters: [
+        {
+          name: "@serviceId",
+          value: serviceId
+        },
+        {
+          name: "@version",
+          value: version
+        }
+      ],
+      query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
+    })
+
+    .chain(maybeService =>
       taskEither.of(
-        results.length > 0
-          ? ResponseSuccessJson(retrievedServiceToPublic(results[0]))
+        isSome(maybeService)
+          ? ResponseSuccessJson(retrievedServiceToPublic(maybeService.value))
           : ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
@@ -132,11 +120,7 @@ export function GetServiceByRevisionHandler(
   serviceModel: ServiceModel
 ): IGetServiceByRevisionHandler {
   return async (serviceId, version) =>
-    getServiceByRevisionTask(
-      serviceModel,
-      serviceId,
-      Number(version) as NonNegativeInteger
-    )
+    getServiceByRevisionTask(serviceModel, serviceId, version)
       .fold<IGetServiceByRevisionHandlerRet>(
         error =>
           ResponseErrorQuery("Error while retrieving the service", error),
@@ -154,7 +138,7 @@ export function GetServiceByRevision(
   const handler = GetServiceByRevisionHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(
     RequiredParamMiddleware("serviceid", NonEmptyString),
-    RequiredParamMiddleware("version", NonEmptyString)
+    RequiredParamMiddleware("version", IntegerFromString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

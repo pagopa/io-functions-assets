@@ -17,9 +17,10 @@ import {
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 
-import { right } from "fp-ts/lib/Either";
+import { none, some } from "fp-ts/lib/Option";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
-import * as asyncI from "io-functions-commons/dist/src/utils/async";
+import { toCosmosErrorResponse } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetServiceByRevisionHandler } from "../handler";
 
@@ -76,49 +77,17 @@ const aSeralizedService: ServicePublic = {
   version: aVersion
 };
 
-const resultsMock: ReadonlyArray<any> = [[right(aRetrievedService)]];
-
-const aServiceIteratorMock = {
-  next: jest.fn(() =>
-    Promise.resolve({
-      value: jest.fn(() => resultsMock)
-    })
-  )
-};
-
-const anErrorServiceIteratorMock = {
-  next: jest.fn(() => Promise.reject("Error"))
-};
-
-const aFlattenAsyncIterableImpl = () => {
-  return {
-    [Symbol.asyncIterator]: () => aServiceIteratorMock
-  };
-};
-
 describe("GetServiceByRevisionHandler", () => {
   it("should get an existing service by a given revision", async () => {
     const serviceModelMock = {
-      getQueryIterator: jest.fn(() => aServiceIteratorMock)
+      findOneByQuery: jest.fn(() => taskEither.of(some(aRetrievedService)))
     };
-
-    jest
-      .spyOn(asyncI, "asyncIterableToArray")
-      .mockImplementationOnce(() =>
-        Promise.resolve([right(aRetrievedService)])
-      );
-    jest
-      .spyOn(asyncI, "flattenAsyncIterable")
-      .mockImplementationOnce(aFlattenAsyncIterableImpl);
     const aServiceId = "1" as NonEmptyString;
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
       serviceModelMock as any
     );
-    const response = await getServiceByRevisionHandler(
-      aServiceId,
-      (aVersion as unknown) as NonEmptyString
-    );
-    expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
+    const response = await getServiceByRevisionHandler(aServiceId, aVersion);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSeralizedService);
@@ -126,49 +95,29 @@ describe("GetServiceByRevisionHandler", () => {
   });
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
-      getQueryIterator: jest.fn(() => anErrorServiceIteratorMock)
+      findOneByQuery: jest.fn(() => fromLeft(toCosmosErrorResponse("error")))
     };
-
-    jest
-      .spyOn(asyncI, "asyncIterableToArray")
-      .mockImplementationOnce(() => Promise.reject("Error"));
-
-    jest.spyOn(asyncI, "flattenAsyncIterable").mockImplementationOnce(() => {
-      return {
-        [Symbol.asyncIterator]: () => anErrorServiceIteratorMock
-      };
-    });
     const aServiceId = "1" as NonEmptyString;
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
       serviceModelMock as any
     );
-    const response = await getServiceByRevisionHandler(
-      aServiceId,
-      (aVersion as unknown) as NonEmptyString
-    );
-    expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
+    const response = await getServiceByRevisionHandler(aServiceId, aVersion);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
-      getQueryIterator: jest.fn(() => aServiceIteratorMock)
+      findOneByQuery: jest.fn(() => taskEither.of(none))
     };
-    jest
-      .spyOn(asyncI, "asyncIterableToArray")
-      .mockImplementationOnce(() => Promise.resolve([]));
-
-    jest
-      .spyOn(asyncI, "flattenAsyncIterable")
-      .mockImplementationOnce(aFlattenAsyncIterableImpl);
     const aServiceId = "1" as NonEmptyString;
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
       serviceModelMock as any
     );
     const response = await getServiceByRevisionHandler(
       aServiceId,
-      (999 as unknown) as NonEmptyString
+      999 as NonNegativeInteger
     );
-    expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 });
