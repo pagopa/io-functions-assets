@@ -25,6 +25,7 @@ import {
 
 import {
   RetrievedService,
+  SERVICE_MODEL_ID_FIELD,
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
@@ -52,7 +53,7 @@ type IGetServiceByRevisionHandlerRet =
 
 type IGetServiceByRevisionHandler = (
   serviceId: ServiceId,
-  version: NonNegativeInteger
+  version: NonEmptyString
 ) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
@@ -95,19 +96,22 @@ const getServiceByRevisionTask = (
     () =>
       asyncIterableToArray(
         flattenAsyncIterable(
-          serviceModel.getQueryIterator({
-            parameters: [
-              {
-                name: "@serviceId",
-                value: serviceId
-              },
-              {
-                name: "@version",
-                value: version
-              }
-            ],
-            query: `SELECT * FROM m WHERE m.serviceId = @serviceId and m.version = @version`
-          })
+          serviceModel.getQueryIterator(
+            {
+              parameters: [
+                {
+                  name: "@serviceId",
+                  value: serviceId
+                },
+                {
+                  name: "@version",
+                  value: version
+                }
+              ],
+              query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
+            },
+            { maxItemCount: 1 }
+          )
         )
       ),
     toCosmosErrorResponse
@@ -128,7 +132,11 @@ export function GetServiceByRevisionHandler(
   serviceModel: ServiceModel
 ): IGetServiceByRevisionHandler {
   return async (serviceId, version) =>
-    getServiceByRevisionTask(serviceModel, serviceId, version)
+    getServiceByRevisionTask(
+      serviceModel,
+      serviceId,
+      Number(version) as NonNegativeInteger
+    )
       .fold<IGetServiceByRevisionHandlerRet>(
         error =>
           ResponseErrorQuery("Error while retrieving the service", error),
@@ -146,7 +154,7 @@ export function GetServiceByRevision(
   const handler = GetServiceByRevisionHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(
     RequiredParamMiddleware("serviceid", NonEmptyString),
-    RequiredParamMiddleware("version", NonNegativeInteger)
+    RequiredParamMiddleware("version", NonEmptyString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

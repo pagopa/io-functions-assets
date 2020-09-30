@@ -114,7 +114,10 @@ describe("GetServiceByRevisionHandler", () => {
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
       serviceModelMock as any
     );
-    const response = await getServiceByRevisionHandler(aServiceId, aVersion);
+    const response = await getServiceByRevisionHandler(
+      aServiceId,
+      (aVersion as unknown) as NonEmptyString
+    );
     expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
@@ -139,7 +142,10 @@ describe("GetServiceByRevisionHandler", () => {
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
       serviceModelMock as any
     );
-    const response = await getServiceByRevisionHandler(aServiceId, aVersion);
+    const response = await getServiceByRevisionHandler(
+      aServiceId,
+      (aVersion as unknown) as NonEmptyString
+    );
     expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
@@ -160,7 +166,7 @@ describe("GetServiceByRevisionHandler", () => {
     );
     const response = await getServiceByRevisionHandler(
       aServiceId,
-      999 as NonNegativeInteger
+      (999 as unknown) as NonEmptyString
     );
     expect(serviceModelMock.getQueryIterator).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");

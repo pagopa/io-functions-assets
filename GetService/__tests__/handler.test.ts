@@ -104,9 +104,9 @@ describe("GetServiceHandler", () => {
     const aServiceId = "1" as NonEmptyString;
     const getServiceHandler = GetServiceHandler(serviceModelMock as any);
     const response = await getServiceHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aServiceId
-    );
+    ]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSeralizedService);
@@ -121,9 +121,9 @@ describe("GetServiceHandler", () => {
     const aServiceId = "1" as NonEmptyString;
     const getServiceHandler = GetServiceHandler(serviceModelMock as any);
     const response = await getServiceHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aServiceId
-    );
+    ]);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
   it("should return not found if the service does not exist", async () => {
@@ -135,9 +135,9 @@ describe("GetServiceHandler", () => {
     const aServiceId = "1" as NonEmptyString;
     const getServiceHandler = GetServiceHandler(serviceModelMock as any);
     const response = await getServiceHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith(
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aServiceId
-    );
+    ]);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 });
