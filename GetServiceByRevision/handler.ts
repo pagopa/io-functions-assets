@@ -25,9 +25,13 @@ import {
 
 import {
   RetrievedService,
+  SERVICE_MODEL_ID_FIELD,
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
+import { identity } from "fp-ts/lib/function";
+import { isSome } from "fp-ts/lib/Option";
+import { taskEither } from "fp-ts/lib/TaskEither";
 import {
   NotificationChannel,
   NotificationChannelEnum
@@ -35,15 +39,20 @@ import {
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
+import {
+  IntegerFromString,
+  NonNegativeInteger
+} from "italia-ts-commons/lib/numbers";
 
-type IGetServiceHandlerRet =
+type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
   | IResponseErrorNotFound
   | IResponseErrorQuery;
 
-type IGetServiceHandler = (
-  serviceId: ServiceId
-) => Promise<IGetServiceHandlerRet>;
+type IGetServiceByRevisionHandler = (
+  serviceId: ServiceId,
+  version: NonNegativeInteger
+) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
   retrievedService: RetrievedService
@@ -76,41 +85,60 @@ function retrievedServiceToPublic(
   };
 }
 
-/**
- * Extracts the serviceId value from the URL path parameter.
- */
-const requiredServiceIdMiddleware = RequiredParamMiddleware(
-  "serviceid",
-  NonEmptyString
-);
+const getServiceByRevisionTask = (
+  serviceModel: ServiceModel,
+  serviceId: ServiceId,
+  version: NonNegativeInteger
+) =>
+  serviceModel
+    .findOneByQuery({
+      parameters: [
+        {
+          name: "@serviceId",
+          value: serviceId
+        },
+        {
+          name: "@version",
+          value: version
+        }
+      ],
+      query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
+    })
 
-export function GetServiceHandler(
-  serviceModel: ServiceModel
-): IGetServiceHandler {
-  return async serviceId =>
-    (await serviceModel.findLastVersionByModelId([serviceId]).run()).fold<
-      IGetServiceHandlerRet
-    >(
-      error => ResponseErrorQuery("Error while retrieving the service", error),
-      maybeService =>
-        maybeService.foldL<
-          IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
-        >(
-          () =>
-            ResponseErrorNotFound(
+    .chain(maybeService =>
+      taskEither.of(
+        isSome(maybeService)
+          ? ResponseSuccessJson(retrievedServiceToPublic(maybeService.value))
+          : ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
-            ),
-          service => ResponseSuccessJson(retrievedServiceToPublic(service))
-        )
+            )
+      )
     );
+
+export function GetServiceByRevisionHandler(
+  serviceModel: ServiceModel
+): IGetServiceByRevisionHandler {
+  return async (serviceId, version) =>
+    getServiceByRevisionTask(serviceModel, serviceId, version)
+      .fold<IGetServiceByRevisionHandlerRet>(
+        error =>
+          ResponseErrorQuery("Error while retrieving the service", error),
+        identity
+      )
+      .run();
 }
 
 /**
  * Wraps a GetService handler inside an Express request handler.
  */
-export function GetService(serviceModel: ServiceModel): express.RequestHandler {
-  const handler = GetServiceHandler(serviceModel);
-  const middlewaresWrap = withRequestMiddlewares(requiredServiceIdMiddleware);
+export function GetServiceByRevision(
+  serviceModel: ServiceModel
+): express.RequestHandler {
+  const handler = GetServiceByRevisionHandler(serviceModel);
+  const middlewaresWrap = withRequestMiddlewares(
+    RequiredParamMiddleware("serviceid", NonEmptyString),
+    RequiredParamMiddleware("version", IntegerFromString)
+  );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
