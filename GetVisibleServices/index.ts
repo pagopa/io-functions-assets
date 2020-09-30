@@ -15,7 +15,7 @@ import { GetVisibleServices } from "./handler";
 const app = express();
 secureExpressApp(app);
 
-const storageConnectionString = getRequiredStringEnv("QueueStorageConnection");
+const storageConnectionString = getRequiredStringEnv("CachedStorageConnection");
 const blobService = createBlobService(storageConnectionString);
 
 app.get("/api/v1/services", GetVisibleServices(blobService));
