@@ -24,7 +24,8 @@ const serviceModel = new ServiceModel(
 );
 
 app.get(
-  "/api/v1/services/:serviceid/revision/:version",
+  "/api/v1/services/:serviceid/revisions/:version",
+
   GetServiceByRevision(serviceModel)
 );
 

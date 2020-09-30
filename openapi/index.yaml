@@ -67,7 +67,7 @@ paths:
           description: No service found for the provided ID.
         "429":
           description: Too many requests
-  "/services/{service_id}/revision/{version}":
+  "/services/{service_id}/revisions/{version}":
     get:
       operationId: getServiceByRevision
       summary: GetService by a given version
