@@ -38,6 +38,21 @@ paths:
           description: Unauthorized
         "429":
           description: Too many requests
+  "/services/scope":
+    get:
+      operationId: getVisibleServicesByScope
+      summary: GetVisibleServices by its scope (i.e NATIONAL or LOCAL).
+      description: |-
+        Returns all the services grouped by its scope.
+      tags:
+        - restricted
+      responses:
+        "200":
+          description: Found.
+          schema:
+            $ref: "#/definitions/ServicesByScope"
+        "429":
+          description: Too many requests
   "/services/{service_id}":
     get:
       operationId: getService
@@ -132,4 +147,17 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceTupleCollection"
   PaginationResponse:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/PaginationResponse"
+  ServiceId:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceId"
+  ServicesByScope:
+    type: object
+    properties: 
+      NATIONAL:
+        type: array
+        items:
+          $ref: "#/ServiceId"
+      LOCAL:
+        type: array
+        items:
+          $ref: "#/ServiceId"
  
