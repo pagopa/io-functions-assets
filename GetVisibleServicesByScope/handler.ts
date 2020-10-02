@@ -6,8 +6,10 @@ import { BlobService } from "azure-storage";
 
 import {
   IResponseErrorInternal,
+  IResponseErrorNotFound,
   IResponseSuccessJson,
   ResponseErrorInternal,
+  ResponseErrorNotFound,
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
@@ -27,6 +29,7 @@ export type ServicesByScope = t.TypeOf<typeof ServicesByScope>;
 
 type IGetVisibleServicesByScopeHandlerRet =
   | IResponseSuccessJson<ServicesByScope>
+  | IResponseErrorNotFound
   | IResponseErrorInternal;
 
 type IGetVisibleServicesByScopeHandler = () => Promise<
@@ -54,11 +57,17 @@ export function GetVisibleServicesByScopeHandler(
         ResponseErrorInternal(
           `Error getting visible services by scope list: ${error.message}`
         ),
-      maybeVisibleServicesByScopeJson => {
-        return ResponseSuccessJson(
-          maybeVisibleServicesByScopeJson.getOrElse({})
-        );
-      }
+      maybeVisibleServicesByScopeJson =>
+        maybeVisibleServicesByScopeJson.foldL<
+          IResponseSuccessJson<ServicesByScope> | IResponseErrorNotFound
+        >(
+          () =>
+            ResponseErrorNotFound(
+              "Not Found",
+              "The requested resource was not found on the system"
+            ),
+          visibleServicesByScope => ResponseSuccessJson(visibleServicesByScope)
+        )
     );
   };
 }

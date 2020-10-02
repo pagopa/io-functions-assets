@@ -20,6 +20,8 @@ import {
 
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
+import { none } from "fp-ts/lib/Option";
+import { BlobNotFoundCode } from "io-functions-commons/dist/src/utils/azure_storage";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import {
   GetVisibleServicesByScope,
@@ -104,6 +106,27 @@ describe("GetVisibleServicesByScopeHandler", () => {
         NATIONAL: [aVisibleService.serviceId]
       });
     }
+  });
+
+  it("should return Not found if no blob was found", async () => {
+    const blobStorageMock = {
+      getBlobToText: jest.fn().mockImplementation((_, __, ___, cb) => {
+        cb({ code: BlobNotFoundCode }, none);
+      })
+    };
+    const getVisibleServicesHandler = GetVisibleServicesByScopeHandler(
+      blobStorageMock as any,
+      servicesByScopeBlobId
+    );
+    const response = await getVisibleServicesHandler();
+
+    expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
+      VISIBLE_SERVICE_CONTAINER,
+      servicesByScopeBlobId,
+      {},
+      expect.any(Function)
+    );
+    expect(response.kind).toEqual("IResponseErrorNotFound");
   });
 });
 
