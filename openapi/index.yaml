@@ -157,9 +157,9 @@ definitions:
       NATIONAL:
         type: array
         items:
-          $ref: "#/ServiceId"
+          $ref: "#/definitions/ServiceId"
       LOCAL:
         type: array
         items:
-          $ref: "#/ServiceId"
+          $ref: "#/definitions/ServiceId"
  
