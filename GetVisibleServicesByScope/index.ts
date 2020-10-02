@@ -21,7 +21,8 @@ const blobService = createBlobService(storageConnectionString);
 const servicesByScopeBlobId = getRequiredStringEnv("SERVICES_BY_SCOPE_BLOB_ID");
 
 app.get(
-  "/api/v1/services/scope",
+  "/services/servicesByScope.json",
+
   GetVisibleServicesByScope(blobService, servicesByScopeBlobId)
 );
 
