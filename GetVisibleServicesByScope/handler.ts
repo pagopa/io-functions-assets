@@ -11,10 +11,7 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import {
-  VISIBLE_SERVICE_CONTAINER,
-  VisibleService
-} from "io-functions-commons/dist/src/models/visible_service";
+import { VISIBLE_SERVICE_CONTAINER } from "io-functions-commons/dist/src/models/visible_service";
 
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { getBlobAsObject } from "io-functions-commons/dist/src/utils/azure_storage";

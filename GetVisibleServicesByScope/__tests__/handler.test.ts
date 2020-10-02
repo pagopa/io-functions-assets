@@ -6,8 +6,6 @@ import {
   OrganizationFiscalCode
 } from "italia-ts-commons/lib/strings";
 
-import { response as MockResponse } from "jest-mock-express";
-
 import {
   NewService,
   RetrievedService,
@@ -16,7 +14,6 @@ import {
   toAuthorizedRecipients
 } from "io-functions-commons/dist/src/models/service";
 import {
-  VISIBLE_SERVICE_BLOB_ID,
   VISIBLE_SERVICE_CONTAINER,
   VisibleService
 } from "io-functions-commons/dist/src/models/visible_service";
@@ -93,9 +90,7 @@ describe("GetVisibleServicesByScopeHandler", () => {
       servicesByScopeBlobId
     );
     const response = await getVisibleServicesHandler();
-    response.apply(MockResponse());
 
-    await Promise.resolve(); // needed to let the response promise complete
     expect(blobStorageMock.getBlobToText).toHaveBeenCalledWith(
       VISIBLE_SERVICE_CONTAINER,
       servicesByScopeBlobId,
@@ -103,6 +98,12 @@ describe("GetVisibleServicesByScopeHandler", () => {
       expect.any(Function)
     );
     expect(response.kind).toEqual("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson") {
+      expect(response.value).toEqual({
+        LOCAL: [aVisibleService.serviceId],
+        NATIONAL: [aVisibleService.serviceId]
+      });
+    }
   });
 });
 
