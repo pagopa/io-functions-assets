@@ -18,7 +18,7 @@ secureExpressApp(app);
 const storageConnectionString = getRequiredStringEnv("CachedStorageConnection");
 const blobService = createBlobService(storageConnectionString);
 
-app.get("/api/v1/services", GetVisibleServices(blobService));
+app.get("/services", GetVisibleServices(blobService));
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 

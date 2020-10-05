@@ -5,7 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "route": "v1/services/{serviceid}/revisions/{version}",
+      "route": "services/{serviceid}/revisions/{version}",
       "methods": [
         "get"
       ]
