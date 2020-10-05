@@ -1,4 +1,48 @@
 {
   "$schema": "http://json.schemastore.org/proxies",
-  "proxies": {}
+  "proxies": {
+    "municipalities":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/municipalities/{*restOfPath}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/municipalities/{restOfPath}"
+    },
+    "backendStatus":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/status/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/status/{path}"
+    },
+    "servicesByScope":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/services/servicesByScope.json"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/services/servicesByScope.json"
+    },
+    "contextualHelp":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/contextualhelp/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/contextualhelp/{path}"
+    },
+    "bonus":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/bonus/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/bonus/{path}"
+    },
+    "serviceLogos":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/services/{serviceId}.png"
+      },
+      "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/{serviceId}.png"
+    }
+  
+  }
 }

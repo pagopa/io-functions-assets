@@ -23,7 +23,7 @@ const serviceModel = new ServiceModel(
   cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
 );
 
-app.get("/api/v1/services/:serviceid", GetService(serviceModel));
+app.get("/services/:serviceid.json", GetService(serviceModel));
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 

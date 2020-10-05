@@ -88,9 +88,12 @@ export function GetServiceHandler(
   serviceModel: ServiceModel
 ): IGetServiceHandler {
   return async serviceId =>
-    (await serviceModel.findLastVersionByModelId([serviceId]).run()).fold<
-      IGetServiceHandlerRet
-    >(
+    (
+      await serviceModel
+        // tslint:disable-next-line: no-useless-cast
+        .findLastVersionByModelId([serviceId.toUpperCase() as NonEmptyString])
+        .run()
+    ).fold<IGetServiceHandlerRet>(
       error => ResponseErrorQuery("Error while retrieving the service", error),
       maybeService =>
         maybeService.foldL<
