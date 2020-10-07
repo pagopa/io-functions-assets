@@ -12,6 +12,7 @@ import {
   NewService,
   RetrievedService,
   Service,
+  ServiceMetadata,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
 } from "io-functions-commons/dist/src/models/service";
@@ -21,11 +22,9 @@ import { ServicePublic } from "io-functions-commons/dist/generated/definitions/S
 
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServiceScopeEnum } from "io-functions-commons/dist/generated/definitions/ServiceScope";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
-import {
-  GetServiceHandler,
-  serviceAvailableNotificationChannels
-} from "../handler";
+import { GetServiceMetadataHandler } from "../handler";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -33,14 +32,8 @@ afterEach(() => {
 });
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
-
-const aServicePayload: ServicePublic = {
-  department_name: "MyDeptName" as NonEmptyString,
-  organization_fiscal_code: anOrganizationFiscalCode,
-  organization_name: "MyOrgName" as NonEmptyString,
-  service_id: "MySubscriptionId" as NonEmptyString,
-  service_name: "MyServiceName" as NonEmptyString,
-  version: 1
+const aServiceMetadata = {
+  scope: ServiceScopeEnum.NATIONAL
 };
 
 const aService: Service = {
@@ -53,6 +46,7 @@ const aService: Service = {
   organizationName: "MyOrgName" as NonEmptyString,
   requireSecureChannels: false,
   serviceId: "MySubscriptionId" as NonEmptyString,
+  serviceMetadata: aServiceMetadata,
   serviceName: "MyServiceName" as NonEmptyString
 };
 
@@ -69,47 +63,28 @@ const aRetrievedService: RetrievedService = {
   version: 1 as NonNegativeInteger
 };
 
-const aSeralizedService: ServicePublic = {
-  ...aServicePayload,
-  available_notification_channels: [
-    NotificationChannelEnum.EMAIL,
-    NotificationChannelEnum.WEBHOOK
-  ],
-  version: 1 as NonNegativeInteger
+const aSerializedServiceMetadata: ServiceMetadata = {
+  ...aServiceMetadata
 };
 
-describe("serviceAvailableNotificationChannels", () => {
-  it("should return an array with the right notification channels", () => {
-    expect(serviceAvailableNotificationChannels(aRetrievedService)).toEqual([
-      NotificationChannelEnum.EMAIL,
-      NotificationChannelEnum.WEBHOOK
-    ]);
-
-    expect(
-      serviceAvailableNotificationChannels({
-        ...aRetrievedService,
-        requireSecureChannels: true
-      })
-    ).toEqual([NotificationChannelEnum.WEBHOOK]);
-  });
-});
-
-describe("GetServiceHandler", () => {
-  it("should get an existing service", async () => {
+describe("GetServiceMetadataHandler", () => {
+  it("should get an existing service metadata", async () => {
     const serviceModelMock = {
       findLastVersionByModelId: jest.fn(() => {
         return taskEither.of(some(aRetrievedService));
       })
     };
     const aServiceId = "1" as NonEmptyString;
-    const getServiceHandler = GetServiceHandler(serviceModelMock as any);
-    const response = await getServiceHandler(aServiceId);
+    const getServiceMetadataHandler = GetServiceMetadataHandler(
+      serviceModelMock as any
+    );
+    const response = await getServiceMetadataHandler(aServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aServiceId
     ]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
-      expect(response.value).toEqual(aSeralizedService);
+      expect(response.value).toEqual(aSerializedServiceMetadata);
     }
   });
   it("should fail on errors during get", async () => {
@@ -119,8 +94,10 @@ describe("GetServiceHandler", () => {
       })
     };
     const aServiceId = "1" as NonEmptyString;
-    const getServiceHandler = GetServiceHandler(serviceModelMock as any);
-    const response = await getServiceHandler(aServiceId);
+    const getServiceMetadataHandler = GetServiceMetadataHandler(
+      serviceModelMock as any
+    );
+    const response = await getServiceMetadataHandler(aServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aServiceId
     ]);
@@ -133,8 +110,32 @@ describe("GetServiceHandler", () => {
       })
     };
     const aServiceId = "1" as NonEmptyString;
-    const getServiceHandler = GetServiceHandler(serviceModelMock as any);
-    const response = await getServiceHandler(aServiceId);
+    const getServiceMetadataHandler = GetServiceMetadataHandler(
+      serviceModelMock as any
+    );
+    const response = await getServiceMetadataHandler(aServiceId);
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
+      aServiceId
+    ]);
+    expect(response.kind).toBe("IResponseErrorNotFound");
+  });
+
+  it("should return not found if the service does not have metadata", async () => {
+    const serviceModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(
+          some({
+            ...aRetrievedService,
+            serviceMetadata: undefined
+          })
+        );
+      })
+    };
+    const aServiceId = "1" as NonEmptyString;
+    const getServiceMetadataHandler = GetServiceMetadataHandler(
+      serviceModelMock as any
+    );
+    const response = await getServiceMetadataHandler(aServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
       aServiceId
     ]);
