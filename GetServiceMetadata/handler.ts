@@ -24,57 +24,21 @@ import {
 } from "io-functions-commons/dist/src/utils/response";
 
 import {
-  RetrievedService,
+  ServiceMetadata,
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
-import {
-  NotificationChannel,
-  NotificationChannelEnum
-} from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
 
-type IGetServiceHandlerRet =
-  | IResponseSuccessJson<ServicePublic>
+type IGetServiceMetadataHandlerRet =
+  | IResponseSuccessJson<ServiceMetadata>
   | IResponseErrorNotFound
   | IResponseErrorQuery;
 
-type IGetServiceHandler = (
+type IGetServiceMetadataHandler = (
   serviceId: ServiceId
-) => Promise<IGetServiceHandlerRet>;
-
-export function serviceAvailableNotificationChannels(
-  retrievedService: RetrievedService
-): ReadonlyArray<NotificationChannel> {
-  if (retrievedService.requireSecureChannels) {
-    return [NotificationChannelEnum.WEBHOOK];
-  }
-  return [NotificationChannelEnum.EMAIL, NotificationChannelEnum.WEBHOOK];
-}
-
-/**
- * Converts a retrieved service to a service that can be shared via API
- */
-function retrievedServiceToPublic(
-  retrievedService: RetrievedService
-): ServicePublic {
-  return {
-    available_notification_channels: serviceAvailableNotificationChannels(
-      retrievedService
-    ),
-    department_name: retrievedService.departmentName,
-    organization_fiscal_code: retrievedService.organizationFiscalCode,
-    organization_name: retrievedService.organizationName,
-    service_id: retrievedService.serviceId,
-    service_metadata: retrievedService.serviceMetadata
-      ? toApiServiceMetadata(retrievedService.serviceMetadata)
-      : undefined,
-    service_name: retrievedService.serviceName,
-    version: retrievedService.version
-  };
-}
+) => Promise<IGetServiceMetadataHandlerRet>;
 
 /**
  * Extracts the serviceId value from the URL path parameter.
@@ -84,27 +48,35 @@ const requiredServiceIdMiddleware = RequiredParamMiddleware(
   NonEmptyString
 );
 
-export function GetServiceHandler(
+export function GetServiceMetadataHandler(
   serviceModel: ServiceModel
-): IGetServiceHandler {
+): IGetServiceMetadataHandler {
   return async serviceId =>
     (
       await serviceModel
         // tslint:disable-next-line: no-useless-cast
         .findLastVersionByModelId([serviceId.toUpperCase() as NonEmptyString])
         .run()
-    ).fold<IGetServiceHandlerRet>(
+    ).fold<IGetServiceMetadataHandlerRet>(
       error => ResponseErrorQuery("Error while retrieving the service", error),
       maybeService =>
         maybeService.foldL<
-          IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
+          IResponseErrorNotFound | IResponseSuccessJson<ServiceMetadata>
         >(
           () =>
             ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
             ),
-          service => ResponseSuccessJson(retrievedServiceToPublic(service))
+          service =>
+            service.serviceMetadata
+              ? ResponseSuccessJson(
+                  toApiServiceMetadata(service.serviceMetadata)
+                )
+              : ResponseErrorNotFound(
+                  "Service metadata not found",
+                  "The service you requested doesn't have metadata attribute."
+                )
         )
     );
 }
@@ -112,8 +84,10 @@ export function GetServiceHandler(
 /**
  * Wraps a GetService handler inside an Express request handler.
  */
-export function GetService(serviceModel: ServiceModel): express.RequestHandler {
-  const handler = GetServiceHandler(serviceModel);
+export function GetServiceMetadata(
+  serviceModel: ServiceModel
+): express.RequestHandler {
+  const handler = GetServiceMetadataHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(requiredServiceIdMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
 }

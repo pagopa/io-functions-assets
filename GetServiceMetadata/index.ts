@@ -13,7 +13,7 @@ import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/c
 import createAzureFunctionHandler from "io-functions-express/dist/src/createAzureFunctionsHandler";
 
 import { cosmosdbInstance } from "../utils/cosmosdb";
-import { GetService } from "./handler";
+import { GetServiceMetadata } from "./handler";
 
 // Setup Express
 const app = express();
@@ -23,7 +23,7 @@ const serviceModel = new ServiceModel(
   cosmosdbInstance.container(SERVICE_COLLECTION_NAME)
 );
 
-app.get("/services/:serviceid.json", GetService(serviceModel));
+app.get("/services/:serviceid.json", GetServiceMetadata(serviceModel));
 
 const azureFunctionHandler = createAzureFunctionHandler(app);
 
