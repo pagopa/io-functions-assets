@@ -40,9 +40,9 @@ paths:
           description: Too many requests
   "/services/{service_id}":
     get:
-      operationId: getService
-      summary: GetService
-      description: A previously created service with the provided service ID is returned.
+      operationId: getServiceMetadata
+      summary: GetService Metadata
+      description: A previously created service metadata with the provided service ID is returned.
       tags:
         - restricted
       parameters:
@@ -53,9 +53,9 @@ paths:
           description: The ID of an existing Service.
       responses:
         "200":
-          description: Service found.
+          description: Service metadata found.
           schema:
-            "$ref": "#/definitions/ServicePublic"
+            "$ref": "#/definitions/ServiceMetadata"
           examples:
             application/json:
               department_name: dept
@@ -134,4 +134,6 @@ definitions:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/PaginationResponse"
   ServiceId:
     $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceId"
+  ServiceMetadata:
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceMetadata"
  
