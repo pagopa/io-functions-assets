@@ -18,10 +18,8 @@ import {
 } from "io-functions-commons/dist/src/models/service";
 
 import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
 import { ServiceScopeEnum } from "io-functions-commons/dist/generated/definitions/ServiceScope";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetServiceMetadataHandler } from "../handler";

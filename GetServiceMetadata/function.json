@@ -16,5 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/GetService/index.js"
+  "scriptFile": "../dist/GetServiceMetadata/index.js"
 }
