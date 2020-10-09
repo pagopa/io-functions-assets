@@ -3,7 +3,6 @@ import { createBlobService } from "azure-storage";
 
 import * as express from "express";
 
-import { getRequiredStringEnv } from "io-functions-commons/dist/src/utils/env";
 import { secureExpressApp } from "io-functions-commons/dist/src/utils/express";
 import { setAppContext } from "io-functions-commons/dist/src/utils/middlewares/context_middleware";
 
@@ -11,12 +10,15 @@ import createAzureFunctionHandler from "io-functions-express/dist/src/createAzur
 
 import { GetVisibleServices } from "./handler";
 
+import { getConfigOrThrow } from "../utils/config";
+
+const config = getConfigOrThrow();
+
 // Setup Express
 const app = express();
 secureExpressApp(app);
 
-const storageConnectionString = getRequiredStringEnv("CachedStorageConnection");
-const blobService = createBlobService(storageConnectionString);
+const blobService = createBlobService(config.CachedStorageConnection);
 
 app.get("/services", GetVisibleServices(blobService));
 
