@@ -39,7 +39,7 @@
     "serviceLogos":{
       "matchCondition": {
         "methods": ["GET"],
-        "route": "/services/{serviceId}.png"
+        "route": "/logos/services/{serviceId}.png"
       },
       "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/{serviceId}.png"
     }
