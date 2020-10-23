@@ -55,11 +55,11 @@ export function GetServiceMetadataHandler(
   return async serviceId =>
     (
       await serviceModel
-        // tslint:disable-next-line: no-useless-cast
         .findLastVersionByModelId(
           lowerCaseServiceIds.includes(serviceId)
             ? [serviceId]
-            : [serviceId.toUpperCase() as NonEmptyString]
+            : // tslint:disable-next-line: no-useless-cast
+              [serviceId.toUpperCase() as NonEmptyString]
         )
         .run()
     ).fold<IGetServiceMetadataHandlerRet>(
