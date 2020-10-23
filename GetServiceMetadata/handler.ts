@@ -63,6 +63,7 @@ export function GetServiceMetadataHandler(
                 value: serviceId
               }
             ],
+            // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
             query: `SELECT * FROM n WHERE StringEquals(n.${SERVICE_MODEL_PK_FIELD}, @serviceId, true) ORDER BY n.version DESC`
           },
           {
