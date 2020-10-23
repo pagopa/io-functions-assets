@@ -33,7 +33,8 @@ const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 const aServiceMetadata = {
   scope: ServiceScopeEnum.NATIONAL
 };
-
+const aLowerCaseServiceId = "mysubscriptionid" as NonEmptyString;
+const anUpperCaseServiceId = "MYSUBSCRIPTIONID" as NonEmptyString;
 const aService: Service = {
   authorizedCIDRs: toAuthorizedCIDRs([]),
   authorizedRecipients: toAuthorizedRecipients([]),
@@ -43,7 +44,7 @@ const aService: Service = {
   organizationFiscalCode: anOrganizationFiscalCode,
   organizationName: "MyOrgName" as NonEmptyString,
   requireSecureChannels: false,
-  serviceId: "MySubscriptionId" as NonEmptyString,
+  serviceId: anUpperCaseServiceId,
   serviceMetadata: aServiceMetadata,
   serviceName: "MyServiceName" as NonEmptyString
 };
@@ -66,19 +67,41 @@ const aSerializedServiceMetadata: ServiceMetadata = {
 };
 
 describe("GetServiceMetadataHandler", () => {
+  it("should get an existing service metadata with lowercase serviceId", async () => {
+    const serviceModelMock = {
+      findLastVersionByModelId: jest.fn(() => {
+        return taskEither.of(
+          some({ ...aRetrievedService, serviceId: aLowerCaseServiceId })
+        );
+      })
+    };
+    const getServiceMetadataHandler = GetServiceMetadataHandler(
+      serviceModelMock as any,
+      [aLowerCaseServiceId]
+    );
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
+      aLowerCaseServiceId
+    ]);
+    expect(response.kind).toBe("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson") {
+      expect(response.value).toEqual(aSerializedServiceMetadata);
+    }
+  });
+
   it("should get an existing service metadata", async () => {
     const serviceModelMock = {
       findLastVersionByModelId: jest.fn(() => {
         return taskEither.of(some(aRetrievedService));
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any
+      serviceModelMock as any,
+      []
     );
-    const response = await getServiceMetadataHandler(aServiceId);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
+      anUpperCaseServiceId
     ]);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
@@ -91,13 +114,13 @@ describe("GetServiceMetadataHandler", () => {
         return fromLeft(none);
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any
+      serviceModelMock as any,
+      []
     );
-    const response = await getServiceMetadataHandler(aServiceId);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
+      anUpperCaseServiceId
     ]);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
@@ -107,13 +130,13 @@ describe("GetServiceMetadataHandler", () => {
         return taskEither.of(none);
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any
+      serviceModelMock as any,
+      []
     );
-    const response = await getServiceMetadataHandler(aServiceId);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
+      anUpperCaseServiceId
     ]);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
@@ -129,13 +152,13 @@ describe("GetServiceMetadataHandler", () => {
         );
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any
+      serviceModelMock as any,
+      []
     );
-    const response = await getServiceMetadataHandler(aServiceId);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
     expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
+      anUpperCaseServiceId
     ]);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });

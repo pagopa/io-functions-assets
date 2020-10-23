@@ -49,13 +49,18 @@ const requiredServiceIdMiddleware = RequiredParamMiddleware(
 );
 
 export function GetServiceMetadataHandler(
-  serviceModel: ServiceModel
+  serviceModel: ServiceModel,
+  lowerCaseServiceIds: readonly ServiceId[]
 ): IGetServiceMetadataHandler {
   return async serviceId =>
     (
       await serviceModel
         // tslint:disable-next-line: no-useless-cast
-        .findLastVersionByModelId([serviceId.toUpperCase() as NonEmptyString])
+        .findLastVersionByModelId(
+          lowerCaseServiceIds.includes(serviceId)
+            ? [serviceId]
+            : [serviceId.toUpperCase() as NonEmptyString]
+        )
         .run()
     ).fold<IGetServiceMetadataHandlerRet>(
       error => ResponseErrorQuery("Error while retrieving the service", error),
@@ -85,9 +90,10 @@ export function GetServiceMetadataHandler(
  * Wraps a GetService handler inside an Express request handler.
  */
 export function GetServiceMetadata(
-  serviceModel: ServiceModel
+  serviceModel: ServiceModel,
+  lowerCaseServiceIds: readonly ServiceId[]
 ): express.RequestHandler {
-  const handler = GetServiceMetadataHandler(serviceModel);
+  const handler = GetServiceMetadataHandler(serviceModel, lowerCaseServiceIds);
   const middlewaresWrap = withRequestMiddlewares(requiredServiceIdMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
 }
