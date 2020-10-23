@@ -33,7 +33,8 @@ const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
 const aServiceMetadata = {
   scope: ServiceScopeEnum.NATIONAL
 };
-
+const aLowerCaseServiceId = "mysubscriptionid" as NonEmptyString;
+const anUpperCaseServiceId = "MYSUBSCRIPTIONID" as NonEmptyString;
 const aService: Service = {
   authorizedCIDRs: toAuthorizedCIDRs([]),
   authorizedRecipients: toAuthorizedRecipients([]),
@@ -43,7 +44,7 @@ const aService: Service = {
   organizationFiscalCode: anOrganizationFiscalCode,
   organizationName: "MyOrgName" as NonEmptyString,
   requireSecureChannels: false,
-  serviceId: "MySubscriptionId" as NonEmptyString,
+  serviceId: anUpperCaseServiceId,
   serviceMetadata: aServiceMetadata,
   serviceName: "MyServiceName" as NonEmptyString
 };
@@ -66,20 +67,36 @@ const aSerializedServiceMetadata: ServiceMetadata = {
 };
 
 describe("GetServiceMetadataHandler", () => {
-  it("should get an existing service metadata", async () => {
+  it("should get an existing service metadata with lowercase serviceId", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
-        return taskEither.of(some(aRetrievedService));
+      findOneByQuery: jest.fn(() => {
+        return taskEither.of(
+          some({ ...aRetrievedService, serviceId: aLowerCaseServiceId })
+        );
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
       serviceModelMock as any
     );
-    const response = await getServiceMetadataHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
-    ]);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
+    expect(response.kind).toBe("IResponseSuccessJson");
+    if (response.kind === "IResponseSuccessJson") {
+      expect(response.value).toEqual(aSerializedServiceMetadata);
+    }
+  });
+
+  it("should get an existing service metadata", async () => {
+    const serviceModelMock = {
+      findOneByQuery: jest.fn(() => {
+        return taskEither.of(some(aRetrievedService));
+      })
+    };
+    const getServiceMetadataHandler = GetServiceMetadataHandler(
+      serviceModelMock as any
+    );
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSerializedServiceMetadata);
@@ -87,40 +104,34 @@ describe("GetServiceMetadataHandler", () => {
   });
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return fromLeft(none);
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
       serviceModelMock as any
     );
-    const response = await getServiceMetadataHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
-    ]);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return taskEither.of(none);
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
       serviceModelMock as any
     );
-    const response = await getServiceMetadataHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
-    ]);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 
   it("should return not found if the service does not have metadata", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return taskEither.of(
           some({
             ...aRetrievedService,
@@ -129,14 +140,11 @@ describe("GetServiceMetadataHandler", () => {
         );
       })
     };
-    const aServiceId = "1" as NonEmptyString;
     const getServiceMetadataHandler = GetServiceMetadataHandler(
       serviceModelMock as any
     );
-    const response = await getServiceMetadataHandler(aServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aServiceId
-    ]);
+    const response = await getServiceMetadataHandler(aLowerCaseServiceId);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 });

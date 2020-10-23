@@ -24,6 +24,7 @@ import {
 } from "io-functions-commons/dist/src/utils/response";
 
 import {
+  SERVICE_MODEL_PK_FIELD,
   ServiceMetadata,
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
@@ -54,8 +55,21 @@ export function GetServiceMetadataHandler(
   return async serviceId =>
     (
       await serviceModel
-        // tslint:disable-next-line: no-useless-cast
-        .findLastVersionByModelId([serviceId.toUpperCase() as NonEmptyString])
+        .findOneByQuery(
+          {
+            parameters: [
+              {
+                name: "@serviceId",
+                value: serviceId
+              }
+            ],
+            // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
+            query: `SELECT * FROM n WHERE StringEquals(n.${SERVICE_MODEL_PK_FIELD}, @serviceId, true) ORDER BY n.version DESC`
+          },
+          {
+            maxItemCount: 1
+          }
+        )
         .run()
     ).fold<IGetServiceMetadataHandlerRet>(
       error => ResponseErrorQuery("Error while retrieving the service", error),

@@ -17,6 +17,9 @@ export const IConfig = t.interface({
   COSMOSDB_URI: NonEmptyString,
 
   CachedStorageConnection: NonEmptyString,
+  SLOT_TASK_HUBNAME: NonEmptyString,
+  STATIC_BLOB_ASSETS_ENDPOINT: NonEmptyString,
+  STATIC_WEB_ASSETS_ENDPOINT: NonEmptyString,
 
   isProduction: t.boolean
 });
