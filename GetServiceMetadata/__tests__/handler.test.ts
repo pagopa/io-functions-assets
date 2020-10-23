@@ -69,20 +69,17 @@ const aSerializedServiceMetadata: ServiceMetadata = {
 describe("GetServiceMetadataHandler", () => {
   it("should get an existing service metadata with lowercase serviceId", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return taskEither.of(
           some({ ...aRetrievedService, serviceId: aLowerCaseServiceId })
         );
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any,
-      [aLowerCaseServiceId]
+      serviceModelMock as any
     );
     const response = await getServiceMetadataHandler(aLowerCaseServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      aLowerCaseServiceId
-    ]);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSerializedServiceMetadata);
@@ -91,18 +88,15 @@ describe("GetServiceMetadataHandler", () => {
 
   it("should get an existing service metadata", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return taskEither.of(some(aRetrievedService));
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any,
-      []
+      serviceModelMock as any
     );
     const response = await getServiceMetadataHandler(aLowerCaseServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      anUpperCaseServiceId
-    ]);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSerializedServiceMetadata);
@@ -110,40 +104,34 @@ describe("GetServiceMetadataHandler", () => {
   });
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return fromLeft(none);
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any,
-      []
+      serviceModelMock as any
     );
     const response = await getServiceMetadataHandler(aLowerCaseServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      anUpperCaseServiceId
-    ]);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return taskEither.of(none);
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any,
-      []
+      serviceModelMock as any
     );
     const response = await getServiceMetadataHandler(aLowerCaseServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      anUpperCaseServiceId
-    ]);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 
   it("should return not found if the service does not have metadata", async () => {
     const serviceModelMock = {
-      findLastVersionByModelId: jest.fn(() => {
+      findOneByQuery: jest.fn(() => {
         return taskEither.of(
           some({
             ...aRetrievedService,
@@ -153,13 +141,10 @@ describe("GetServiceMetadataHandler", () => {
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
-      serviceModelMock as any,
-      []
+      serviceModelMock as any
     );
     const response = await getServiceMetadataHandler(aLowerCaseServiceId);
-    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledWith([
-      anUpperCaseServiceId
-    ]);
+    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 });

@@ -24,6 +24,7 @@ import {
 } from "io-functions-commons/dist/src/utils/response";
 
 import {
+  SERVICE_MODEL_PK_FIELD,
   ServiceMetadata,
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
@@ -49,17 +50,24 @@ const requiredServiceIdMiddleware = RequiredParamMiddleware(
 );
 
 export function GetServiceMetadataHandler(
-  serviceModel: ServiceModel,
-  lowerCaseServiceIds: readonly ServiceId[]
+  serviceModel: ServiceModel
 ): IGetServiceMetadataHandler {
   return async serviceId =>
     (
       await serviceModel
-        .findLastVersionByModelId(
-          lowerCaseServiceIds.includes(serviceId)
-            ? [serviceId]
-            : // tslint:disable-next-line: no-useless-cast
-              [serviceId.toUpperCase() as NonEmptyString]
+        .findOneByQuery(
+          {
+            parameters: [
+              {
+                name: "@serviceId",
+                value: serviceId
+              }
+            ],
+            query: `SELECT * FROM n WHERE StringEquals(n.${SERVICE_MODEL_PK_FIELD}, @serviceId, true) ORDER BY n.version DESC`
+          },
+          {
+            maxItemCount: 1
+          }
         )
         .run()
     ).fold<IGetServiceMetadataHandlerRet>(
@@ -90,10 +98,9 @@ export function GetServiceMetadataHandler(
  * Wraps a GetService handler inside an Express request handler.
  */
 export function GetServiceMetadata(
-  serviceModel: ServiceModel,
-  lowerCaseServiceIds: readonly ServiceId[]
+  serviceModel: ServiceModel
 ): express.RequestHandler {
-  const handler = GetServiceMetadataHandler(serviceModel, lowerCaseServiceIds);
+  const handler = GetServiceMetadataHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(requiredServiceIdMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
 }
