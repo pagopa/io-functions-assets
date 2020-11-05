@@ -20,7 +20,7 @@
         "methods": ["GET"],
         "route": "/services/servicesByScope.json"
       },
-      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/services/servicesByScope.json"
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/services/visible-services-by-scope.json"
     },
     "contextualHelp":{
       "matchCondition": {
