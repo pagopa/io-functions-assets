@@ -1,4 +1,4 @@
-import { taskEither, fromLeft } from "fp-ts/lib/TaskEither";
+import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
 import { HealthCheck, HealthProblem } from "../../utils/healthcheck";
 import { InfoHandler } from "../handler";
 
