@@ -53,13 +53,6 @@ parameters:
   - name: 'containerInstanceSubnet'
     type: string
 
-resources:
-  repositories:
-    - repository: pagopa-commons
-      type: github
-      name: pagopa/azure-devops-templates
-      ref: refs/tags/v1
-    
 steps:
   - template: ./make-build-steps.yml
     parameters:
