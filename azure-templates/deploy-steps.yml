@@ -115,7 +115,7 @@ steps:
         slotName: 'staging'
       displayName: Deploy to staging slot
 
-    - template: templates/rest-healthcheck/template.yaml@pagopa-commons 
+    - template: templates/rest-healthcheck/template.yaml@pagopaCommons 
       parameters:
         azureSubscription: '${{ parameters.azureSubscription }}'
         appName: '${{ parameters.appName }}'
