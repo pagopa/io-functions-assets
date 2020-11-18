@@ -31,16 +31,6 @@ parameters:
   - name: 'healthcheckEndpoint'
     type: string
 
-  # min container instance cpu
-  - name: 'containerInstanceCpu'
-    type: string
-    default: '0.5'
-
-  # min container instance memory
-  - name: 'containerInstanceMemory'
-    type: string
-    default: '0.5'
-
   # the resource group must be the same where vnet is created
   - name: 'containerInstanceResourceGroup'
     type: string
@@ -133,8 +123,6 @@ steps:
         containerInstanceResourceGroup: '${{ parameters.containerInstanceResourceGroup }}'
         containerInstanceVNet: '${{ parameters.containerInstanceVNet }}'
         containerInstanceSubnet: '${{ parameters.containerInstanceSubnet }}'
-        containerInstanceCpu: '${{ parameters.containerInstanceCpu }}'
-        containerInstanceMemory: '${{ parameters.containerInstanceMemory }}'
       
     - task: AzureAppServiceManage@0   # Second step: swap 'staging' with 'production' slot
       inputs:
