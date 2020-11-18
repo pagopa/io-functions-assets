@@ -96,7 +96,7 @@ resources:
       type: github
       name: pagopa/azure-devops-templates
       ref: refs/tags/v1
-      endpoint: '$(GITHUB_CONNECTION)'
+      endpoint: 'pagopa'
 
 stages:
   # A) Build and code validation
