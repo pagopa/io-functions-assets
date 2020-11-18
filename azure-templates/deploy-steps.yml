@@ -26,6 +26,39 @@ parameters:
   - name: 'appName'
     type: string
     default: ''
+
+  # full endpoint to perform healthcheck against, 
+  - name: 'healthcheckEndpoint'
+    type: string
+
+  # min container instance cpu
+  - name: 'containerInstanceCpu'
+    type: string
+    default: '0.5'
+
+  # min container instance memory
+  - name: 'containerInstanceMemory'
+    type: string
+    default: '0.5'
+
+  # the resource group must be the same where vnet is created
+  - name: 'containerInstanceResourceGroup'
+    type: string
+
+  # attached vnet to the container instance
+  - name: 'containerInstanceVNet'
+    type: string
+
+  # container instance subnet
+  - name: 'containerInstanceSubnet'
+    type: string
+
+resources:
+  repositories:
+    - repository: pagopa-commons
+      type: github
+      name: pagopa/azure-devops-templates
+      ref: refs/tags/v1
     
 steps:
   - template: ./make-build-steps.yml
@@ -98,6 +131,17 @@ steps:
         deployToSlotOrASE: true
         slotName: 'staging'
       displayName: Deploy to staging slot
+
+    - template: templates/rest-healthcheck/template.yaml@pagopa-commons 
+      parameters:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        appName: '${{ parameters.appName }}'
+        endpoint: '${{ parameters.healthcheckEndpoint }}'
+        containerInstanceResourceGroup: '${{ parameters.containerInstanceResourceGroup }}'
+        containerInstanceVNet: '${{ parameters.containerInstanceVNet }}'
+        containerInstanceSubnet: '${{ parameters.containerInstanceSubnet }}'
+        containerInstanceCpu: '${{ parameters.containerInstanceCpu }}'
+        containerInstanceMemory: '${{ parameters.containerInstanceMemory }}'
       
     - task: AzureAppServiceManage@0   # Second step: swap 'staging' with 'production' slot
       inputs:
