@@ -94,7 +94,7 @@ resources:
   repositories:
     - repository: pagopaCommons
       type: github
-      name: pagopa/azure-devops-templates
+      name: pagopa/azure-pipelines-templates
       ref: refs/tags/v1
       endpoint: 'pagopa'
 
