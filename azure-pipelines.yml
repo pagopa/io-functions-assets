@@ -208,7 +208,7 @@ stages:
               azureSubscription: '$(TEST_AZURE_SUBSCRIPTION)'
               resourceGroupName: '$(TEST_RESOURCE_GROUP_NAME)'
               appName: '$(TEST_APP_NAME)'
-              healthcheckEndpoint: 'https://$(PRODUCTION_APP_NAME).staging.azurewebsites.net/info'
+              healthcheckEndpoint: 'https://$(TEST_APP_NAME).staging.azurewebsites.net/info'
               containerInstanceResourceGroup: $(HEALTHCHECK_CONTAINER_RESOURCE_GROUP)
               containerInstanceVNet: $(HEALTHCHECK_CONTAINER_VNET)
               containerInstanceSubnet: $(HEALTHCHECK_CONTAINER_SUBNET)
@@ -249,4 +249,3 @@ stages:
               containerInstanceResourceGroup: $(HEALTHCHECK_CONTAINER_RESOURCE_GROUP)
               containerInstanceVNet: $(HEALTHCHECK_CONTAINER_VNET)
               containerInstanceSubnet: $(HEALTHCHECK_CONTAINER_SUBNET)
-
