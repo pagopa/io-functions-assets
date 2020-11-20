@@ -26,7 +26,23 @@ parameters:
   - name: 'appName'
     type: string
     default: ''
-    
+
+  # full endpoint to perform healthcheck against, 
+  - name: 'healthcheckEndpoint'
+    type: string
+
+  # the resource group must be the same where vnet is created
+  - name: 'containerInstanceResourceGroup'
+    type: string
+
+  # attached vnet to the container instance
+  - name: 'containerInstanceVNet'
+    type: string
+
+  # container instance subnet
+  - name: 'containerInstanceSubnet'
+    type: string
+
 steps:
   - template: ./make-build-steps.yml
     parameters:
@@ -98,6 +114,15 @@ steps:
         deployToSlotOrASE: true
         slotName: 'staging'
       displayName: Deploy to staging slot
+
+    - template: templates/rest-healthcheck/template.yaml@pagopaCommons 
+      parameters:
+        azureSubscription: '${{ parameters.azureSubscription }}'
+        appName: '${{ parameters.appName }}'
+        endpoint: '${{ parameters.healthcheckEndpoint }}'
+        containerInstanceResourceGroup: '${{ parameters.containerInstanceResourceGroup }}'
+        containerInstanceVNet: '${{ parameters.containerInstanceVNet }}'
+        containerInstanceSubnet: '${{ parameters.containerInstanceSubnet }}'
       
     - task: AzureAppServiceManage@0   # Second step: swap 'staging' with 'production' slot
       inputs:
