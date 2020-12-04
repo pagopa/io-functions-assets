@@ -111,18 +111,6 @@ export const checkAzureStorageHealth = (
     .map(_ => true);
 
 /**
- * Check a url is reachable
- *
- * @param url url to connect with
- *
- * @returns either true or an array of error messages
- */
-export const checkUrlHealth = (url: string): HealthCheck<"Url", true> =>
-  tryCatch(() => fetch(url, { method: "HEAD" }), toHealthProblems("Url")).map(
-    _ => true
-  );
-
-/**
  * Execute all the health checks for the application
  *
  * @returns either true or an array of error messages
@@ -139,9 +127,7 @@ export const checkApplicationHealth = (): HealthCheck<ProblemSource, true> =>
         Array<TaskEither<ReadonlyArray<HealthProblem<ProblemSource>>, true>>
       >(
         checkAzureCosmosDbHealth(config.COSMOSDB_URI, config.COSMOSDB_KEY),
-        checkAzureStorageHealth(config.CachedStorageConnection),
-        checkUrlHealth(config.STATIC_BLOB_ASSETS_ENDPOINT),
-        checkUrlHealth(config.STATIC_WEB_ASSETS_ENDPOINT)
+        checkAzureStorageHealth(config.CachedStorageConnection)
       )
     )
     .map(_ => true);
