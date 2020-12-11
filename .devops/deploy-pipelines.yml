@@ -134,7 +134,7 @@ stages:
               package: '$(Build.ArtifactStagingDirectory)/'
               deploymentMethod: 'auto'
               deployToSlotOrASE: true
-              slotName: 'production'
+              slotName: 'staging'
             displayName: Deploy to staging slot
 
   # Check that the staging instance is healthy
