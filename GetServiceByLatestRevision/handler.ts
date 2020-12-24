@@ -11,8 +11,6 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
-
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
@@ -29,8 +27,6 @@ import {
 } from "io-functions-commons/dist/src/models/service";
 
 import { identity } from "fp-ts/lib/function";
-import { isSome } from "fp-ts/lib/Option";
-import { taskEither } from "fp-ts/lib/TaskEither";
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 import { retrievedServiceToPublic } from "../utils/services";
@@ -44,38 +40,34 @@ type IGetServiceByLatestRevisionHandler = (
   serviceId: ServiceId
 ) => Promise<IGetServiceByLatestRevisionHandlerRet>;
 
-const getServiceByLatestRevisionTask = (
-  serviceModel: ServiceModel,
-  serviceId: ServiceId
-) =>
-  serviceModel
-    .findOneByQuery({
-      parameters: [
-        {
-          name: "@serviceId",
-          value: serviceId
-        }
-      ],
-      // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
-      query: `SELECT * FROM m WHERE StringEquals(m.${SERVICE_MODEL_ID_FIELD}, @serviceId, true) ORDER BY m.version DESC`
-    })
-
-    .chain(maybeService =>
-      taskEither.of(
-        isSome(maybeService)
-          ? ResponseSuccessJson(retrievedServiceToPublic(maybeService.value))
-          : ResponseErrorNotFound(
-              "Service not found",
-              "The service you requested was not found in the system."
-            )
-      )
-    );
-
 export function GetServiceByLatestRevisionHandler(
   serviceModel: ServiceModel
 ): IGetServiceByLatestRevisionHandler {
   return async serviceId =>
-    getServiceByLatestRevisionTask(serviceModel, serviceId)
+    serviceModel
+      .findOneByQuery({
+        parameters: [
+          {
+            name: "@serviceId",
+            value: serviceId
+          }
+        ],
+        // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
+        query: `SELECT TOP 1 * FROM m WHERE StringEquals(m.${SERVICE_MODEL_ID_FIELD}, @serviceId, true) ORDER BY m.version DESC`
+      })
+
+      .map(maybeService =>
+        maybeService.fold<
+          IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
+        >(
+          ResponseErrorNotFound(
+            "Service not found",
+            "The service you requested was not found in the system."
+          ),
+          service => ResponseSuccessJson(retrievedServiceToPublic(service))
+        )
+      )
+
       .fold<IGetServiceByLatestRevisionHandlerRet>(
         error =>
           ResponseErrorQuery("Error while retrieving the service", error),
@@ -92,7 +84,7 @@ export function GetServiceByLatestRevision(
 ): express.RequestHandler {
   const handler = GetServiceByLatestRevisionHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(
-    RequiredParamMiddleware("serviceid", NonEmptyString)
+    RequiredParamMiddleware("serviceid", ServiceId)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }
