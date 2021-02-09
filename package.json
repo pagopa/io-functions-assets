@@ -1,5 +1,5 @@
 {
-  "name": "io-functions-assets",
+  "name": "@pagopa/io-functions-assets",
   "description": "A set of fnctions used to serve IOpublic assets",
   "author": "IO team",
   "repository": "https://github.com/pagoPA/io-functions-assets",
