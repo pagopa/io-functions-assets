@@ -56,6 +56,13 @@
         "route": "/logos/abi/{abiCode}.png"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/abi/{abiCode}.png"
+    },
+    "privative":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/logos/privative/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/privative/{path}"
     }
   }
 }
