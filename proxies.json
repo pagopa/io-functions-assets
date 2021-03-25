@@ -22,6 +22,20 @@
       },
       "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/visible-services-by-scope.json"
     },
+    "servicesWebViewCompact":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/services-webview/visible-services-compact.json"
+      },
+      "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services-webview/visible-services-compact.json"
+    },
+    "servicesWebViewExtended":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/services-webview/visible-services-compact.json"
+      },
+      "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services-webview/visible-services-extended.json"
+    },
     "contextualHelp":{
       "matchCondition": {
         "methods": ["GET"],
