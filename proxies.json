@@ -70,6 +70,20 @@
         "route": "/logos/privative/{*path}"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/privative/{path}"
+    },
+    "idpslist":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/spid/idps/list.json"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/spid/idps/list.json"
+    },
+    "idpslogo":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/spid/idps/{idp}.png"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/spid/idps/{idp}.png"
     }
   }
 }
