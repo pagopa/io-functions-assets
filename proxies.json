@@ -27,7 +27,7 @@
         "methods": ["GET"],
         "route": "/services-webview/{*path}"
       },
-      "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services-webview/{path}"
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/services-webview/{path}"
     },
     "contextualHelp":{
       "matchCondition": {
