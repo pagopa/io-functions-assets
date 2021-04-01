@@ -70,6 +70,13 @@
         "route": "/logos/privative/{*path}"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/privative/{path}"
+    },
+    "spidIdp":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/spid/idps/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/spid/idps/{path}"
     }
   }
 }
