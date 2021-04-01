@@ -22,6 +22,13 @@
       },
       "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/visible-services-by-scope.json"
     },
+    "servicesWebView":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/services-webview/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/services-webview/{path}"
+    },
     "contextualHelp":{
       "matchCondition": {
         "methods": ["GET"],
@@ -56,6 +63,20 @@
         "route": "/logos/abi/{abiCode}.png"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/abi/{abiCode}.png"
+    },
+    "privative":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/logos/privative/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/privative/{path}"
+    },
+    "spidIdp":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/spid/idps/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/spid/idps/{path}"
     }
   }
 }
