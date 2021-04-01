@@ -11,7 +11,10 @@ import {
   ResponseSuccessJson
 } from "italia-ts-commons/lib/responses";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import {
+  INonEmptyStringTag,
+  NonEmptyString
+} from "italia-ts-commons/lib/strings";
 
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
@@ -39,10 +42,7 @@ import {
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
-import {
-  IntegerFromString,
-  NonNegativeInteger
-} from "italia-ts-commons/lib/numbers";
+import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 
 type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -51,7 +51,7 @@ type IGetServiceByRevisionHandlerRet =
 
 type IGetServiceByRevisionHandler = (
   serviceId: ServiceId,
-  version: NonNegativeInteger
+  version: number
 ) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
@@ -88,7 +88,7 @@ function retrievedServiceToPublic(
 const getServiceByRevisionTask = (
   serviceModel: ServiceModel,
   serviceId: ServiceId,
-  version: NonNegativeInteger
+  version: number
 ) =>
   serviceModel
     .findOneByQuery({
@@ -136,7 +136,12 @@ export function GetServiceByRevision(
   serviceModel: ServiceModel
 ): express.RequestHandler {
   const handler = GetServiceByRevisionHandler(serviceModel);
-  const middlewaresWrap = withRequestMiddlewares(
+  const middlewaresWrap = withRequestMiddlewares<
+    "IResponseErrorValidation",
+    "IResponseErrorValidation",
+    string & INonEmptyStringTag,
+    number
+  >(
     RequiredParamMiddleware("serviceid", NonEmptyString),
     RequiredParamMiddleware("version", IntegerFromString)
   );

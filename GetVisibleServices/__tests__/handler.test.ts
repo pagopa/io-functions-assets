@@ -6,6 +6,7 @@ import {
   OrganizationFiscalCode
 } from "italia-ts-commons/lib/strings";
 
+// @ts-ignore /* missing .d.ts declaration file in the library */
 import { response as MockResponse } from "jest-mock-express";
 
 import {
