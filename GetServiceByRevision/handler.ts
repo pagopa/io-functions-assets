@@ -102,7 +102,8 @@ const getServiceByRevisionTask = (
           value: version
         }
       ],
-      query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
+      // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
+      query: `SELECT * FROM m WHERE StringEquals(m.${SERVICE_MODEL_ID_FIELD}, @serviceId, true) and m.version = @version`
     })
 
     .chain(maybeService =>
