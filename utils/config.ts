@@ -5,9 +5,9 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;

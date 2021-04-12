@@ -502,6 +502,20 @@
   dependencies:
     "@types/node" ">= 8"
 
+"@pagopa/ts-commons@^9.2.0":
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/@pagopa/ts-commons/-/ts-commons-9.2.0.tgz#7f81931b5327762358098fb1fddfe36edbc619bb"
+  integrity sha512-1IiJVBLm5oIkwRjfzaucOdgGEbN7+pj+C0g21TgVpeHst19RXsTJ5/K1z7A5EAjh+w+Fh9ufMDvIhNEEzJPgsA==
+  dependencies:
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.1.2"
+    applicationinsights "^1.7.4"
+    fp-ts "1.17.4"
+    io-ts "1.8.5"
+    json-set-map "^1.0.2"
+    node-fetch "^2.6.0"
+    validator "^10.1.0"
+
 "@sinonjs/commons@^1.7.0":
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.1.tgz#e7df00f98a203324f6dc7cc606cad9d4a8ab2217"
@@ -3810,20 +3824,6 @@ italia-ts-commons@^7.0.1:
   integrity sha512-IIZYim8LydSA3nbeCxbR23marXhx3Z/FLUh7cV6XxNrB5OpKeVMmQhXV42oErP+g/vsrCQ/LRSrLX8cpi1Nghg==
   dependencies:
     agentkeepalive "https://github.com/pagopa/agentkeepalive#v4.1.1"
-    applicationinsights "^1.7.4"
-    fp-ts "1.17.4"
-    io-ts "1.8.5"
-    json-set-map "^1.0.2"
-    node-fetch "^2.6.0"
-    validator "^10.1.0"
-
-italia-ts-commons@^8.1.0:
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/italia-ts-commons/-/italia-ts-commons-8.5.0.tgz#9967ec1b94745f482d5cc942a1bacf7de6f6461b"
-  integrity sha512-pTX90/WW987t7pdcbQngCFm35c3gQlDFIUCnDZ6VCo5vNMl8VwdZztGIcYyEaJw6xMjb1WjSRlltnDdSe0B9Eg==
-  dependencies:
-    abort-controller "^3.0.0"
-    agentkeepalive "^4.1.2"
     applicationinsights "^1.7.4"
     fp-ts "1.17.4"
     io-ts "1.8.5"

@@ -1,4 +1,5 @@
 import { CosmosClient } from "@azure/cosmos";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import {
   common as azurestorageCommon,
   createBlobService,
@@ -15,7 +16,6 @@ import {
   TaskEither,
   tryCatch
 } from "fp-ts/lib/TaskEither";
-import { readableReport } from "italia-ts-commons/lib/reporters";
 import { getConfig, IConfig } from "./config";
 
 type ProblemSource = "AzureCosmosDB" | "AzureStorage" | "Config" | "Url";

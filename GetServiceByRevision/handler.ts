@@ -9,12 +9,12 @@ import {
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
 import {
   INonEmptyStringTag,
   NonEmptyString
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
@@ -32,6 +32,10 @@ import {
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
+import {
+  INonNegativeIntegerTag,
+  NonNegativeIntegerFromString
+} from "@pagopa/ts-commons/lib/numbers";
 import { identity } from "fp-ts/lib/function";
 import { isSome } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
@@ -42,7 +46,6 @@ import {
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
-import { IntegerFromString } from "italia-ts-commons/lib/numbers";
 
 type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -51,7 +54,7 @@ type IGetServiceByRevisionHandlerRet =
 
 type IGetServiceByRevisionHandler = (
   serviceId: ServiceId,
-  version: number
+  version: number & INonNegativeIntegerTag
 ) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
@@ -88,7 +91,7 @@ function retrievedServiceToPublic(
 const getServiceByRevisionTask = (
   serviceModel: ServiceModel,
   serviceId: ServiceId,
-  version: number
+  version: number & INonNegativeIntegerTag
 ) =>
   serviceModel
     .findOneByQuery({
@@ -140,10 +143,10 @@ export function GetServiceByRevision(
     "IResponseErrorValidation",
     "IResponseErrorValidation",
     string & INonEmptyStringTag,
-    number
+    number & INonNegativeIntegerTag
   >(
     RequiredParamMiddleware("serviceid", NonEmptyString),
-    RequiredParamMiddleware("version", IntegerFromString)
+    RequiredParamMiddleware("version", NonNegativeIntegerFromString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

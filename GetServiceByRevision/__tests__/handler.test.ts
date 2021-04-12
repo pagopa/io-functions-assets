@@ -1,10 +1,13 @@
 // tslint:disable:no-any
 
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import {
+  NonNegativeInteger,
+  NonNegativeIntegerFromString
+} from "@pagopa/ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
 import {
   NewService,
@@ -119,5 +122,17 @@ describe("GetServiceByRevisionHandler", () => {
     );
     expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
+  });
+});
+
+describe("NonNegativeIntegerFromString", () => {
+  it("should get integer 1 from string '1'", async () => {
+    const n = NonNegativeIntegerFromString.decode("1");
+    expect(n.isRight()).toBeTruthy();
+    expect(n.value).toEqual(1);
+  });
+  it("should get error from string '-1'", () => {
+    const n = NonNegativeIntegerFromString.decode("-1");
+    expect(n.isLeft()).toBeTruthy();
   });
 });
