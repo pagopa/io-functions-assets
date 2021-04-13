@@ -2,7 +2,7 @@ import { initAppInsights } from "@pagopa/ts-commons/lib/appinsights";
 import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as ai from "applicationinsights";
-import { identity } from "fp-ts/lib/function";
+import { identity, toString } from "fp-ts/lib/function";
 
 // the internal function runtime has MaxTelemetryItem per second set to 20 by default
 // @see https://github.com/Azure/azure-functions-host/blob/master/src/WebJobs.Script/Config/ApplicationInsightsLoggerOptionsSetup.cs#L29
@@ -21,4 +21,6 @@ export const initTelemetryClient = (env = process.env) =>
             ).getOrElse(DEFAULT_SAMPLING_PERCENTAGE)
           })
         )
-        .fold(_ => undefined, identity);
+        .fold(l => {
+          throw new Error(`Can not init AppInsights: ${toString(l)}`);
+        }, identity);
