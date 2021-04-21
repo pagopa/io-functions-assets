@@ -9,9 +9,9 @@ import {
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
@@ -29,6 +29,10 @@ import {
   ServiceModel
 } from "io-functions-commons/dist/src/models/service";
 
+import {
+  NonNegativeInteger,
+  NonNegativeIntegerFromString
+} from "@pagopa/ts-commons/lib/numbers";
 import { identity } from "fp-ts/lib/function";
 import { isSome } from "fp-ts/lib/Option";
 import { taskEither } from "fp-ts/lib/TaskEither";
@@ -39,10 +43,6 @@ import {
 import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
-import {
-  IntegerFromString,
-  NonNegativeInteger
-} from "italia-ts-commons/lib/numbers";
 
 type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -138,7 +138,7 @@ export function GetServiceByRevision(
   const handler = GetServiceByRevisionHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(
     RequiredParamMiddleware("serviceid", NonEmptyString),
-    RequiredParamMiddleware("version", IntegerFromString)
+    RequiredParamMiddleware("version", NonNegativeIntegerFromString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
 }

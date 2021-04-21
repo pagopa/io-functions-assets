@@ -43,6 +43,7 @@
     "typescript": "^3.9.5"
   },
   "dependencies": {
+    "@pagopa/ts-commons": "^9.2.0",
     "abort-controller": "^3.0.0",
     "applicationinsights": "^1.7.4",
     "azure-sb": "^0.11.1",
@@ -53,8 +54,7 @@
     "fp-ts": "1.17.4",
     "io-functions-commons": "^14.6.0",
     "io-functions-express": "^0.1.0",
-    "io-ts": "1.8.5",
-    "italia-ts-commons": "^8.1.0"
+    "io-ts": "1.8.5"
   },
   "resolutions": {
     "fp-ts": "1.17.4"

@@ -1,4 +1,4 @@
-import { EmailString, FiscalCode } from "italia-ts-commons/lib/strings";
+import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
 import { CosmosResource } from "io-functions-commons/dist/src/utils/cosmosdb_model";
 

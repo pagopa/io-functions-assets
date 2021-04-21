@@ -1,11 +1,12 @@
 // tslint:disable:no-any
 
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
+// @ts-ignore /* missing .d.ts declaration file in the library */
 import { response as MockResponse } from "jest-mock-express";
 
 import {
