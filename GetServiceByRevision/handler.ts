@@ -11,10 +11,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 
-import {
-  INonEmptyStringTag,
-  NonEmptyString
-} from "@pagopa/ts-commons/lib/strings";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
@@ -33,7 +30,7 @@ import {
 } from "io-functions-commons/dist/src/models/service";
 
 import {
-  INonNegativeIntegerTag,
+  NonNegativeInteger,
   NonNegativeIntegerFromString
 } from "@pagopa/ts-commons/lib/numbers";
 import { identity } from "fp-ts/lib/function";
@@ -54,7 +51,7 @@ type IGetServiceByRevisionHandlerRet =
 
 type IGetServiceByRevisionHandler = (
   serviceId: ServiceId,
-  version: number & INonNegativeIntegerTag
+  version: NonNegativeInteger
 ) => Promise<IGetServiceByRevisionHandlerRet>;
 
 export function serviceAvailableNotificationChannels(
@@ -91,7 +88,7 @@ function retrievedServiceToPublic(
 const getServiceByRevisionTask = (
   serviceModel: ServiceModel,
   serviceId: ServiceId,
-  version: number & INonNegativeIntegerTag
+  version: NonNegativeInteger
 ) =>
   serviceModel
     .findOneByQuery({
@@ -139,12 +136,7 @@ export function GetServiceByRevision(
   serviceModel: ServiceModel
 ): express.RequestHandler {
   const handler = GetServiceByRevisionHandler(serviceModel);
-  const middlewaresWrap = withRequestMiddlewares<
-    "IResponseErrorValidation",
-    "IResponseErrorValidation",
-    string & INonEmptyStringTag,
-    number & INonNegativeIntegerTag
-  >(
+  const middlewaresWrap = withRequestMiddlewares(
     RequiredParamMiddleware("serviceid", NonEmptyString),
     RequiredParamMiddleware("version", NonNegativeIntegerFromString)
   );
