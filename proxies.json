@@ -77,6 +77,13 @@
         "route": "/spid/idps/{*path}"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/spid/idps/{path}"
+    },
+    "emailAssets":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/email-assets/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/email-assets/{path}"
     }
   }
 }
