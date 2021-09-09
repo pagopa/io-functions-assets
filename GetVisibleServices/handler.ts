@@ -27,7 +27,6 @@ import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitio
 import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import * as TE from "fp-ts/lib/TaskEither";
 
 type IGetVisibleServicesHandlerRet =
   | IResponseSuccessJson<PaginatedServiceTupleCollection>
