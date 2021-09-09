@@ -1,3 +1,5 @@
+import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
+import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorInternal,
   IResponseSuccessJson,
@@ -5,9 +7,7 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import * as packageJson from "../package.json";
-import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
