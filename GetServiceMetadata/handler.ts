@@ -32,6 +32,10 @@ import {
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+
 type IGetServiceMetadataHandlerRet =
   | IResponseSuccessJson<ServiceMetadata>
   | IResponseErrorNotFound
@@ -49,34 +53,46 @@ const requiredServiceIdMiddleware = RequiredParamMiddleware(
   NonEmptyString
 );
 
+/**
+ *
+ * @param serviceModel Cosmos Model for Service
+ * @param serviceId The id of the Service to retrieve
+ * @returns
+ */
+const findService = (serviceModel: ServiceModel, serviceId: NonEmptyString) =>
+  serviceModel.findOneByQuery(
+    {
+      parameters: [
+        {
+          name: "@serviceId",
+          value: serviceId
+        }
+      ],
+      // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
+      query: `SELECT * FROM n WHERE StringEquals(n.${SERVICE_MODEL_PK_FIELD}, @serviceId, true) ORDER BY n.version DESC`
+    },
+    {
+      maxItemCount: 1
+    }
+  );
+
+/**
+ *
+ * @param serviceModel
+ * @returns
+ */
+
 export function GetServiceMetadataHandler(
   serviceModel: ServiceModel
 ): IGetServiceMetadataHandler {
   return async serviceId =>
-    (
-      await serviceModel
-        .findOneByQuery(
-          {
-            parameters: [
-              {
-                name: "@serviceId",
-                value: serviceId
-              }
-            ],
-            // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
-            query: `SELECT * FROM n WHERE StringEquals(n.${SERVICE_MODEL_PK_FIELD}, @serviceId, true) ORDER BY n.version DESC`
-          },
-          {
-            maxItemCount: 1
-          }
-        )
-        .run()
-    ).fold<IGetServiceMetadataHandlerRet>(
-      error => ResponseErrorQuery("Error while retrieving the service", error),
-      maybeService =>
-        maybeService.foldL<
-          IResponseErrorNotFound | IResponseSuccessJson<ServiceMetadata>
-        >(
+    pipe(
+      findService(serviceModel, serviceId),
+      TE.mapLeft(error =>
+        ResponseErrorQuery("Error while retrieving the service", error)
+      ),
+      TE.map(
+        O.fold(
           () =>
             ResponseErrorNotFound(
               "Service not found",
@@ -92,7 +108,9 @@ export function GetServiceMetadataHandler(
                   "The service you requested doesn't have metadata attribute."
                 )
         )
-    );
+      ),
+      TE.toUnion
+    )();
 }
 
 /**
