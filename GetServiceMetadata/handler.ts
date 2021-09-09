@@ -13,24 +13,24 @@ import {
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
   SERVICE_MODEL_PK_FIELD,
   ServiceMetadata,
   ServiceModel
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
 type IGetServiceMetadataHandlerRet =
   | IResponseSuccessJson<ServiceMetadata>

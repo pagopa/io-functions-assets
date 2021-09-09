@@ -15,12 +15,12 @@ import {
   ServiceMetadata,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
 import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import { ServiceScopeEnum } from "io-functions-commons/dist/generated/definitions/ServiceScope";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetServiceMetadataHandler } from "../handler";
 
