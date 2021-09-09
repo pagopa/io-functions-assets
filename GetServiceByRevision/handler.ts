@@ -33,9 +33,11 @@ import {
   NonNegativeInteger,
   NonNegativeIntegerFromString
 } from "@pagopa/ts-commons/lib/numbers";
-import { identity } from "fp-ts/lib/function";
-import { isSome } from "fp-ts/lib/Option";
-import { taskEither } from "fp-ts/lib/TaskEither";
+
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import {
   NotificationChannel,
   NotificationChannelEnum
@@ -90,8 +92,8 @@ const getServiceByRevisionTask = (
   serviceId: ServiceId,
   version: NonNegativeInteger
 ) =>
-  serviceModel
-    .findOneByQuery({
+  pipe(
+    serviceModel.findOneByQuery({
       parameters: [
         {
           name: "@serviceId",
@@ -103,30 +105,30 @@ const getServiceByRevisionTask = (
         }
       ],
       query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
-    })
-
-    .chain(maybeService =>
-      taskEither.of(
-        isSome(maybeService)
+    }),
+    TE.chain(maybeService =>
+      TE.of(
+        O.isSome(maybeService)
           ? ResponseSuccessJson(retrievedServiceToPublic(maybeService.value))
           : ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
             )
       )
-    );
+    )
+  );
 
 export function GetServiceByRevisionHandler(
   serviceModel: ServiceModel
 ): IGetServiceByRevisionHandler {
   return async (serviceId, version) =>
-    getServiceByRevisionTask(serviceModel, serviceId, version)
-      .fold<IGetServiceByRevisionHandlerRet>(
-        error =>
-          ResponseErrorQuery("Error while retrieving the service", error),
-        identity
-      )
-      .run();
+    pipe(
+      getServiceByRevisionTask(serviceModel, serviceId, version),
+      TE.mapLeft(error =>
+        ResponseErrorQuery("Error while retrieving the service", error)
+      ),
+      TE.toUnion
+    )();
 }
 
 /**
