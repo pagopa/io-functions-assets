@@ -24,8 +24,8 @@ import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/
 import { PaginatedServiceTupleCollection } from "@pagopa/io-functions-commons/dist/generated/definitions/PaginatedServiceTupleCollection";
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 
-import { pipe } from "fp-ts/lib/function";
 import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 
 type IGetVisibleServicesHandlerRet =

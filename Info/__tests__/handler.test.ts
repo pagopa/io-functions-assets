@@ -1,8 +1,8 @@
-import * as TE from "fp-ts/lib/TaskEither";
 import {
   HealthCheck,
   HealthProblem
 } from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
+import * as TE from "fp-ts/lib/TaskEither";
 import { InfoHandler } from "../handler";
 
 afterEach(() => {
