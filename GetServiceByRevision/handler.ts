@@ -34,7 +34,7 @@ import {
   NonNegativeIntegerFromString
 } from "@pagopa/ts-commons/lib/numbers";
 
-import { pipe } from "fp-ts/lib/function";
+import { flow, pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
@@ -106,14 +106,17 @@ const getServiceByRevisionTask = (
       ],
       query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
     }),
-    TE.chain(maybeService =>
-      TE.of(
-        O.isSome(maybeService)
-          ? ResponseSuccessJson(retrievedServiceToPublic(maybeService.value))
-          : ResponseErrorNotFound(
+    TE.chainW(
+      flow(
+        O.foldW(
+          () =>
+            ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
-            )
+            ),
+          service => ResponseSuccessJson(retrievedServiceToPublic(service))
+        ),
+        TE.of
       )
     )
   );
