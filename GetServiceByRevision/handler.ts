@@ -114,7 +114,7 @@ const getServiceByRevisionTask = (
               "Service not found",
               "The service you requested was not found in the system."
             ),
-          service => flow(retrievedServiceToPublic, ResponseSuccessJson)
+          flow(retrievedServiceToPublic, ResponseSuccessJson)
         ),
         TE.of
       )
