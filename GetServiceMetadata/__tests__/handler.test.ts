@@ -15,12 +15,12 @@ import {
   ServiceMetadata,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import { ServiceScopeEnum } from "io-functions-commons/dist/generated/definitions/ServiceScope";
+import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceScope";
+import * as TE from "fp-ts/lib/TaskEither";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetServiceMetadataHandler } from "../handler";
 
@@ -70,7 +70,7 @@ describe("GetServiceMetadataHandler", () => {
   it("should get an existing service metadata with lowercase serviceId", async () => {
     const serviceModelMock = {
       findOneByQuery: jest.fn(() => {
-        return taskEither.of(
+        return TE.of(
           some({ ...aRetrievedService, serviceId: aLowerCaseServiceId })
         );
       })
@@ -89,7 +89,7 @@ describe("GetServiceMetadataHandler", () => {
   it("should get an existing service metadata", async () => {
     const serviceModelMock = {
       findOneByQuery: jest.fn(() => {
-        return taskEither.of(some(aRetrievedService));
+        return TE.of(some(aRetrievedService));
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
@@ -105,7 +105,7 @@ describe("GetServiceMetadataHandler", () => {
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
       findOneByQuery: jest.fn(() => {
-        return fromLeft(none);
+        return TE.left(none);
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
@@ -118,7 +118,7 @@ describe("GetServiceMetadataHandler", () => {
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
       findOneByQuery: jest.fn(() => {
-        return taskEither.of(none);
+        return TE.of(none);
       })
     };
     const getServiceMetadataHandler = GetServiceMetadataHandler(
@@ -132,7 +132,7 @@ describe("GetServiceMetadataHandler", () => {
   it("should return not found if the service does not have metadata", async () => {
     const serviceModelMock = {
       findOneByQuery: jest.fn(() => {
-        return taskEither.of(
+        return TE.of(
           some({
             ...aRetrievedService,
             serviceMetadata: undefined

@@ -15,15 +15,16 @@ import {
   Service,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+import * as E from "fp-ts/lib/Either";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
 
-import { none, some } from "fp-ts/lib/Option";
-import { fromLeft, taskEither } from "fp-ts/lib/TaskEither";
-import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
-import { toCosmosErrorResponse } from "io-functions-commons/dist/src/utils/cosmosdb_model";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
+import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetServiceByRevisionHandler } from "../handler";
 
@@ -83,7 +84,7 @@ const aSeralizedService: ServicePublic = {
 describe("GetServiceByRevisionHandler", () => {
   it("should get an existing service by a given revision", async () => {
     const serviceModelMock = {
-      findOneByQuery: jest.fn(() => taskEither.of(some(aRetrievedService)))
+      findOneByQuery: jest.fn(() => TE.of(O.some(aRetrievedService)))
     };
     const aServiceId = "1" as NonEmptyString;
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
@@ -98,7 +99,7 @@ describe("GetServiceByRevisionHandler", () => {
   });
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
-      findOneByQuery: jest.fn(() => fromLeft(toCosmosErrorResponse("error")))
+      findOneByQuery: jest.fn(() => TE.left(toCosmosErrorResponse("error")))
     };
     const aServiceId = "1" as NonEmptyString;
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
@@ -110,7 +111,7 @@ describe("GetServiceByRevisionHandler", () => {
   });
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
-      findOneByQuery: jest.fn(() => taskEither.of(none))
+      findOneByQuery: jest.fn(() => TE.of(O.none))
     };
     const aServiceId = "1" as NonEmptyString;
     const getServiceByRevisionHandler = GetServiceByRevisionHandler(
@@ -128,11 +129,13 @@ describe("GetServiceByRevisionHandler", () => {
 describe("NonNegativeIntegerFromString", () => {
   it("should get integer 1 from string '1'", async () => {
     const n = NonNegativeIntegerFromString.decode("1");
-    expect(n.isRight()).toBeTruthy();
-    expect(n.value).toEqual(1);
+
+    expect(E.isRight(n)).toBeTruthy();
+    expect(E.getOrElse(() => -1)(n)).toEqual(1);
   });
+
   it("should get error from string '-1'", () => {
     const n = NonNegativeIntegerFromString.decode("-1");
-    expect(n.isLeft()).toBeTruthy();
+    expect(E.isLeft(n)).toBeTruthy();
   });
 });

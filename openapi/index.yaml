@@ -115,25 +115,25 @@ parameters:
     x-example: 01BX9NSMKVXXS5PSP2FATZM123
 definitions:
   PaginatedServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/PaginatedServiceTupleCollection"
   ProblemJson:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ProblemJson"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/ProblemJson"
   ServicePublic:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServicePublic"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/ServicePublic"
   EmailAddress:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/EmailAddress"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/EmailAddress"
   FiscalCode:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/FiscalCode"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/FiscalCode"
   TimeToLiveSeconds:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/TimeToLiveSeconds"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/TimeToLiveSeconds"
   Timestamp:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/Timestamp"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/Timestamp"
   ServiceTupleCollection:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceTupleCollection"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/ServiceTupleCollection"
   PaginationResponse:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/PaginationResponse"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/PaginationResponse"
   ServiceId:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceId"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/ServiceId"
   ServiceMetadata:
-    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v14.6.0/openapi/definitions.yaml#/ServiceMetadata"
+    $ref: "https://raw.githubusercontent.com/pagopa/io-functions-commons/v21.5.2/openapi/definitions.yaml#/ServiceMetadata"
  

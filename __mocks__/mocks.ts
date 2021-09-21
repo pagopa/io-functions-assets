@@ -1,6 +1,6 @@
 import { EmailString, FiscalCode } from "@pagopa/ts-commons/lib/strings";
 
-import { CosmosResource } from "io-functions-commons/dist/src/utils/cosmosdb_model";
+import { CosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;

@@ -13,36 +13,38 @@ import {
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
 import {
   RetrievedService,
   SERVICE_MODEL_ID_FIELD,
   ServiceModel
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 
 import {
   NonNegativeInteger,
   NonNegativeIntegerFromString
 } from "@pagopa/ts-commons/lib/numbers";
-import { identity } from "fp-ts/lib/function";
-import { isSome } from "fp-ts/lib/Option";
-import { taskEither } from "fp-ts/lib/TaskEither";
+
+import { flow, pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/lib/Option";
+import * as TE from "fp-ts/lib/TaskEither";
+
 import {
   NotificationChannel,
   NotificationChannelEnum
-} from "io-functions-commons/dist/generated/definitions/NotificationChannel";
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
-import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
+} from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
+import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
 type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -90,8 +92,8 @@ const getServiceByRevisionTask = (
   serviceId: ServiceId,
   version: NonNegativeInteger
 ) =>
-  serviceModel
-    .findOneByQuery({
+  pipe(
+    serviceModel.findOneByQuery({
       parameters: [
         {
           name: "@serviceId",
@@ -103,30 +105,33 @@ const getServiceByRevisionTask = (
         }
       ],
       query: `SELECT * FROM m WHERE m.${SERVICE_MODEL_ID_FIELD} = @serviceId and m.version = @version`
-    })
-
-    .chain(maybeService =>
-      taskEither.of(
-        isSome(maybeService)
-          ? ResponseSuccessJson(retrievedServiceToPublic(maybeService.value))
-          : ResponseErrorNotFound(
+    }),
+    TE.chainW(
+      flow(
+        O.foldW(
+          () =>
+            ResponseErrorNotFound(
               "Service not found",
               "The service you requested was not found in the system."
-            )
+            ),
+          flow(retrievedServiceToPublic, ResponseSuccessJson)
+        ),
+        TE.of
       )
-    );
+    )
+  );
 
 export function GetServiceByRevisionHandler(
   serviceModel: ServiceModel
 ): IGetServiceByRevisionHandler {
   return async (serviceId, version) =>
-    getServiceByRevisionTask(serviceModel, serviceId, version)
-      .fold<IGetServiceByRevisionHandlerRet>(
-        error =>
-          ResponseErrorQuery("Error while retrieving the service", error),
-        identity
-      )
-      .run();
+    pipe(
+      getServiceByRevisionTask(serviceModel, serviceId, version),
+      TE.mapLeft(error =>
+        ResponseErrorQuery("Error while retrieving the service", error)
+      ),
+      TE.toUnion
+    )();
 }
 
 /**
