@@ -140,7 +140,7 @@ stages:
     dependsOn:
       - Deploy_staging
     pool:
-      customVmImage: $(AGENT_POOL)  
+      vmImage: $(AGENT_POOL)  
     jobs:
       - job: 'do_healthcheck'       
         steps:  
