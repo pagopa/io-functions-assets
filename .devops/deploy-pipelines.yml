@@ -144,6 +144,7 @@ stages:
     jobs:
       - job: 'do_healthcheck'       
         steps:  
+          - checkout: none
           - script: |
               # fails if response status is not 2xx
               curl -f -I 'https://$(PRODUCTION_APP_NAME)-staging.azurewebsites.net/info'
