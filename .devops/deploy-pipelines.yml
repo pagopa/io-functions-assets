@@ -146,7 +146,7 @@ stages:
         steps:  
           - script: |
               curl -f -I 'https://$(PRODUCTION_APP_NAME)-staging.azurewebsites.net/info'
-            displayName: 'Build'
+            displayName: 'Healthcheck'
 
   # Promote the staging instance to production
   - stage: Deploy_production
