@@ -27,7 +27,7 @@ resources:
     - repository: pagopaCommons
       type: github
       name: pagopa/azure-pipeline-templates
-      ref: refs/tags/v15
+      ref: refs/tags/v17
       endpoint: 'io-azure-devops-github-ro'
 
 
@@ -140,7 +140,7 @@ stages:
     dependsOn:
       - Deploy_staging
     pool:
-      name: '$(AGENT_POOL)'
+      name: $(AGENT_POOL)  
     jobs:
       - job: 'do_healthcheck'       
         steps:  
