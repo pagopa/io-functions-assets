@@ -147,7 +147,7 @@ stages:
           - checkout: none
           - script: |
               # fails if response status is not 2xx
-              curl -f -I 'https://$(PRODUCTION_APP_NAME)-staging.azurewebsites.net/info'
+              curl -f 'https://$(PRODUCTION_APP_NAME)-staging.azurewebsites.net/info'
             displayName: 'Healthcheck'
 
   # Promote the staging instance to production
