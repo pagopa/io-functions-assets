@@ -140,7 +140,7 @@ stages:
     dependsOn:
       - Deploy_staging
     pool:
-      name: io-prod-linux
+      name: $(AGENT_POOL)
     jobs:
       - job: 'do_healthcheck'       
         steps:  
