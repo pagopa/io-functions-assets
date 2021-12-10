@@ -84,6 +84,13 @@
         "route": "/email-assets/{*path}"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/email-assets/{path}"
+    },
+    "zendesk":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/assistanceTools/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/assistanceTools/{path}"
     }
   }
 }
