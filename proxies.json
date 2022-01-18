@@ -64,6 +64,13 @@
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/abi/{abiCode}.png"
     },
+    "eucovidCertLogos":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/logos/eucovidcert/{logoName}.png"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/eucovidcert/{logoName}.png"
+    },
     "privative":{
       "matchCondition": {
         "methods": ["GET"],
