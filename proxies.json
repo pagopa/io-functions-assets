@@ -43,6 +43,13 @@
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/bonus/{path}"
     },
+    "html":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/html/{page}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/html/{page}"
+    },
     "serviceLogos":{
       "matchCondition": {
         "methods": ["GET"],
