@@ -46,7 +46,7 @@
     "html":{
       "matchCondition": {
         "methods": ["GET"],
-        "route": "/html/{*page}"
+        "route": "/html/{page}.html"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/html/{page}.html"
     },
