@@ -1,11 +1,12 @@
 // tslint:disable:no-any
 
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
+// @ts-ignore /* missing .d.ts declaration file in the library */
 import { response as MockResponse } from "jest-mock-express";
 
 import {
@@ -14,14 +15,14 @@ import {
   Service,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import {
   VISIBLE_SERVICE_BLOB_ID,
   VISIBLE_SERVICE_CONTAINER,
   VisibleService
-} from "io-functions-commons/dist/src/models/visible_service";
+} from "@pagopa/io-functions-commons/dist/src/models/visible_service";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
 
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetVisibleServices, GetVisibleServicesHandler } from "../handler";

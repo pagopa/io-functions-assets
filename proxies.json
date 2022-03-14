@@ -22,6 +22,13 @@
       },
       "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/visible-services-by-scope.json"
     },
+    "servicesWebView":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/services-webview/{*path}"
+      },
+      "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/services-webview/{path}"
+    },
     "contextualHelp":{
       "matchCondition": {
         "methods": ["GET"],
@@ -35,6 +42,13 @@
         "route": "/bonus/{*path}"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/bonus/{path}"
+    },
+    "html":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/html/{page}.html"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/html/{page}.html"
     },
     "serviceLogos":{
       "matchCondition": {
@@ -56,6 +70,48 @@
         "route": "/logos/abi/{abiCode}.png"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/abi/{abiCode}.png"
+    },
+    "appLogos":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/logos/apps/{appName}.png"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/apps/{appName}.png"
+    },
+    "eucovidCertLogos":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/logos/eucovidcert/{logoName}.png"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/eucovidcert/{logoName}.png"
+    },
+    "privative":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/logos/privative/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/logos/privative/{path}"
+    },
+    "spidIdp":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/spid/idps/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/spid/idps/{path}"
+    },
+    "emailAssets":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/email-assets/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/email-assets/{path}"
+    },
+    "assistanceTools":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/assistanceTools/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/assistanceTools/{path}"
     }
   }
 }

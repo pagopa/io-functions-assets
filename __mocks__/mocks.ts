@@ -3,20 +3,20 @@ import {
   FiscalCode,
   NonEmptyString,
   OrganizationFiscalCode
-} from "italia-ts-commons/lib/strings";
+} from "@pagopa/ts-commons/lib/strings";
 
-import { MaxAllowedPaymentAmount } from "io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
-import { NotificationChannelEnum } from "io-functions-commons/dist/generated/definitions/NotificationChannel";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+import { MaxAllowedPaymentAmount } from "@pagopa/io-functions-commons/dist/generated/definitions/MaxAllowedPaymentAmount";
+import { NotificationChannelEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
 import {
   NewService,
   RetrievedService,
   Service,
   toAuthorizedCIDRs,
   toAuthorizedRecipients
-} from "io-functions-commons/dist/src/models/service";
-import { CosmosResource } from "io-functions-commons/dist/src/utils/cosmosdb_model";
-import { NonNegativeInteger } from "italia-ts-commons/lib/numbers";
+} from "@pagopa/io-functions-commons/dist/src/models/service";
+import { CosmosResource } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 export const aEmail = "email@example.com" as EmailString;
 export const aEmailChanged = "email.changed@example.com" as EmailString;

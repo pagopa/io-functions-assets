@@ -5,30 +5,44 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { IntegerFromString } from "@pagopa/ts-commons/lib/numbers";
+import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
+import * as E from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
-import { readableReport } from "italia-ts-commons/lib/reporters";
-import { NonEmptyString } from "italia-ts-commons/lib/strings";
 
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
-export const IConfig = t.interface({
-  COSMOSDB_KEY: NonEmptyString,
-  COSMOSDB_NAME: NonEmptyString,
-  COSMOSDB_URI: NonEmptyString,
+export const IConfig = t.intersection([
+  t.interface({
+    COSMOSDB_KEY: NonEmptyString,
+    COSMOSDB_NAME: NonEmptyString,
+    COSMOSDB_URI: NonEmptyString,
 
-  CachedStorageConnection: NonEmptyString,
-  SLOT_TASK_HUBNAME: NonEmptyString,
-  STATIC_BLOB_ASSETS_ENDPOINT: NonEmptyString,
-  STATIC_WEB_ASSETS_ENDPOINT: NonEmptyString,
+    CachedStorageConnection: NonEmptyString,
+    SLOT_TASK_HUBNAME: NonEmptyString,
+    STATIC_BLOB_ASSETS_ENDPOINT: NonEmptyString,
+    STATIC_WEB_ASSETS_ENDPOINT: NonEmptyString,
 
-  isProduction: t.boolean
-});
+    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+    // the internal function runtime has MaxTelemetryItem per second set to 20 by default
+    // @see https://github.com/Azure/azure-functions-host/blob/master/src/WebJobs.Script/Config/ApplicationInsightsLoggerOptionsSetup.cs#L29
+    APPINSIGHTS_SAMPLING_PERCENTAGE: withDefault(IntegerFromString, 5),
 
-// No need to re-evaluate this object for each call
-const errorOrConfig: t.Validation<IConfig> = IConfig.decode({
+    isProduction: t.boolean
+  }),
+  t.partial({ APPINSIGHTS_DISABLE: t.string })
+]);
+
+export const envConfig = {
   ...process.env,
   isProduction: process.env.NODE_ENV === "production"
-});
+};
+
+// No need to re-evaluate this object for each call
+const errorOrConfig: t.Validation<IConfig> = IConfig.decode(envConfig);
 
 /**
  * Read the application configuration and check for invalid values.
@@ -48,7 +62,10 @@ export function getConfig(): t.Validation<IConfig> {
  * @throws validation errors found while parsing the application configuration
  */
 export function getConfigOrThrow(): IConfig {
-  return errorOrConfig.getOrElseL(errors => {
-    throw new Error(`Invalid configuration: ${readableReport(errors)}`);
-  });
+  return pipe(
+    errorOrConfig,
+    E.getOrElseW(errors => {
+      throw new Error(`Invalid configuration: ${readableReport(errors)}`);
+    })
+  );
 }
