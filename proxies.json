@@ -15,13 +15,6 @@
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/status/{path}"
     },
-    "servicesByScope":{
-      "matchCondition": {
-        "methods": ["GET"],
-        "route": "/services/servicesByScope.json"
-      },
-      "backendUri": "https://%STATIC_BLOB_ASSETS_ENDPOINT%/services/visible-services-by-scope.json"
-    },
     "servicesWebView":{
       "matchCondition": {
         "methods": ["GET"],
