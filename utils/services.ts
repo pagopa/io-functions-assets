@@ -1,10 +1,10 @@
 import {
   NotificationChannel,
   NotificationChannelEnum
-} from "io-functions-commons/dist/generated/definitions/NotificationChannel";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
-import { RetrievedService } from "io-functions-commons/dist/src/models/service";
-import { toApiServiceMetadata } from "io-functions-commons/dist/src/utils/service_metadata";
+} from "@pagopa/io-functions-commons/dist/generated/definitions/NotificationChannel";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
+import { RetrievedService } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
 
 export const serviceAvailableNotificationChannels = (
   retrievedService: RetrievedService

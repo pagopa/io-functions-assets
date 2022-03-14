@@ -15,14 +15,14 @@ afterEach(() => {
 describe("GetServiceByLatestRevisionHandler", () => {
   it("should get an existing service by a given revision", async () => {
     const serviceModelMock = {
-      findOneByQuery: jest.fn(() => TE.of(some(aRetrievedService)))
+      findLastVersionByModelId: jest.fn(() => TE.of(some(aRetrievedService)))
     };
     const aServiceId = "1" as NonEmptyString;
     const getServiceByLatestRevisionHandler = GetServiceByLatestRevisionHandler(
       serviceModelMock as any
     );
     const response = await getServiceByLatestRevisionHandler(aServiceId);
-    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseSuccessJson");
     if (response.kind === "IResponseSuccessJson") {
       expect(response.value).toEqual(aSeralizedService);
@@ -30,26 +30,28 @@ describe("GetServiceByLatestRevisionHandler", () => {
   });
   it("should fail on errors during get", async () => {
     const serviceModelMock = {
-      findOneByQuery: jest.fn(() => TE.left(toCosmosErrorResponse("error")))
+      findLastVersionByModelId: jest.fn(() =>
+        TE.left(toCosmosErrorResponse("error"))
+      )
     };
     const aServiceId = "1" as NonEmptyString;
     const getServiceByLatestRevisionHandler = GetServiceByLatestRevisionHandler(
       serviceModelMock as any
     );
     const response = await getServiceByLatestRevisionHandler(aServiceId);
-    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorQuery");
   });
   it("should return not found if the service does not exist", async () => {
     const serviceModelMock = {
-      findOneByQuery: jest.fn(() => TE.of(none))
+      findLastVersionByModelId: jest.fn(() => TE.of(none))
     };
     const aServiceId = "1" as NonEmptyString;
     const getServiceByLatestRevisionHandler = GetServiceByLatestRevisionHandler(
       serviceModelMock as any
     );
     const response = await getServiceByLatestRevisionHandler(aServiceId);
-    expect(serviceModelMock.findOneByQuery).toHaveBeenCalledTimes(1);
+    expect(serviceModelMock.findLastVersionByModelId).toHaveBeenCalledTimes(1);
     expect(response.kind).toBe("IResponseErrorNotFound");
   });
 });
