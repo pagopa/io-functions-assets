@@ -9,26 +9,23 @@ import {
   IResponseSuccessJson,
   ResponseErrorNotFound,
   ResponseSuccessJson
-} from "italia-ts-commons/lib/responses";
+} from "@pagopa/ts-commons/lib/responses";
 
-import { RequiredParamMiddleware } from "io-functions-commons/dist/src/utils/middlewares/required_param";
+import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
 import {
   withRequestMiddlewares,
   wrapRequestHandler
-} from "io-functions-commons/dist/src/utils/request_middleware";
+} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseErrorQuery,
   ResponseErrorQuery
-} from "io-functions-commons/dist/src/utils/response";
+} from "@pagopa/io-functions-commons/dist/src/utils/response";
 
-import {
-  SERVICE_MODEL_ID_FIELD,
-  ServiceModel
-} from "io-functions-commons/dist/src/models/service";
-
-import { identity } from "fp-ts/lib/function";
-import { ServiceId } from "io-functions-commons/dist/generated/definitions/ServiceId";
-import { ServicePublic } from "io-functions-commons/dist/generated/definitions/ServicePublic";
+import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
+import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
+import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
+import { pipe } from "fp-ts/lib/function";
+import * as TE from "fp-ts/TaskEither";
 import { retrievedServiceToPublic } from "../utils/services";
 
 type IGetServiceByLatestRevisionHandlerRet =
@@ -44,36 +41,22 @@ export function GetServiceByLatestRevisionHandler(
   serviceModel: ServiceModel
 ): IGetServiceByLatestRevisionHandler {
   return async serviceId =>
-    serviceModel
-      .findOneByQuery({
-        parameters: [
-          {
-            name: "@serviceId",
-            value: serviceId
-          }
-        ],
-        // StringEquals is necessary to avoid 404 in case serviceId is in lowercase format into cosmosdb's service collection
-        query: `SELECT TOP 1 * FROM m WHERE StringEquals(m.${SERVICE_MODEL_ID_FIELD}, @serviceId, true) ORDER BY m.version DESC`
-      })
-
-      .map(maybeService =>
-        maybeService.fold<
-          IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
-        >(
+    pipe(
+      serviceModel.findLastVersionByModelId([serviceId]),
+      TE.mapLeft(error =>
+        ResponseErrorQuery("Error while retrieving the service", error)
+      ),
+      TE.chainW(
+        TE.fromOption(() =>
           ResponseErrorNotFound(
             "Service not found",
             "The service you requested was not found in the system."
-          ),
-          service => ResponseSuccessJson(retrievedServiceToPublic(service))
+          )
         )
-      )
-
-      .fold<IGetServiceByLatestRevisionHandlerRet>(
-        error =>
-          ResponseErrorQuery("Error while retrieving the service", error),
-        identity
-      )
-      .run();
+      ),
+      TE.map(service => ResponseSuccessJson(retrievedServiceToPublic(service))),
+      TE.toUnion
+    )();
 }
 
 /**
