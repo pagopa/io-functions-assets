@@ -3,7 +3,7 @@
   "description": "A set of fnctions used to serve IOpublic assets",
   "author": "IO team",
   "repository": "https://github.com/pagoPA/io-functions-assets",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
