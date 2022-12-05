@@ -19,7 +19,7 @@
     "predeploy": "npm-run-all build dist:modules"
   },
   "devDependencies": {
-    "@azure/functions": "^1.2.0",
+    "@azure/functions": "^3.2.0",
     "@pagopa/openapi-codegen-ts": "^10.0.5",
     "@types/azure-sb": "^0.0.37",
     "@types/documentdb": "^1.10.5",
@@ -50,9 +50,6 @@
     "abort-controller": "^3.0.0",
     "applicationinsights": "^1.7.4",
     "azure-sb": "^0.11.1",
-    "azure-storage": "^2.10.3",
-    "documentdb": "^1.12.2",
-    "durable-functions": "^1.4.3",
     "express": "^4.15.3",
     "fp-ts": "^2.11.1",
     "io-ts": "^2.2.16"
