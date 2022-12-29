@@ -13,14 +13,14 @@
     "start": "npm-run-all --parallel start:host watch",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "lint": "tslint -p .",
+    "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all build dist:modules",
-    "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx"
+    "predeploy": "npm-run-all build dist:modules"
   },
   "devDependencies": {
     "@azure/functions": "^3.2.0",
+    "@pagopa/eslint-config": "^1.3.1",
     "@pagopa/openapi-codegen-ts": "^10.0.5",
     "@types/azure-sb": "^0.0.37",
     "@types/documentdb": "^1.10.5",
@@ -31,8 +31,8 @@
     "danger": "^4.0.2",
     "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "fast-check": "^1.16.0",
-    "italia-tslint-rules": "^1.1.3",
     "jest": "^24.8.0",
     "jest-mock-express": "^0.1.1",
     "lolex": "^5.1.1",
@@ -41,7 +41,6 @@
     "prettier": "^1.18.2",
     "shx": "^0.3.2",
     "ts-jest": "^24.0.2",
-    "tslint": "^5.17.0",
     "typescript": "^4.3.5"
   },
   "dependencies": {
