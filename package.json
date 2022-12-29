@@ -16,7 +16,8 @@
     "lint": "tslint -p .",
     "deploy": "npm run build && func azure functionapp publish agid-functions-app-test",
     "dist:modules": "modclean -r -n default:safe && yarn install --production",
-    "predeploy": "npm-run-all build dist:modules"
+    "predeploy": "npm-run-all build dist:modules",
+    "lint": "eslint . -c .eslintrc.js --ext .ts,.tsx"
   },
   "devDependencies": {
     "@azure/functions": "^3.2.0",
