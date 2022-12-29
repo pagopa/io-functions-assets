@@ -6,7 +6,7 @@
 .prettierrc
 local.settings.json*
 tsconfig.json
-tslint.json
+.eslintrc.js
 README.md
 yarn.lock
 jest.config.js

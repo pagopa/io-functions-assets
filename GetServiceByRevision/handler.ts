@@ -45,6 +45,7 @@ import {
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
 import { ServicePublic } from "@pagopa/io-functions-commons/dist/generated/definitions/ServicePublic";
 import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/utils/service_metadata";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 type IGetServiceByRevisionHandlerRet =
   | IResponseSuccessJson<ServicePublic>
@@ -56,42 +57,43 @@ type IGetServiceByRevisionHandler = (
   version: NonNegativeInteger
 ) => Promise<IGetServiceByRevisionHandlerRet>;
 
-export function serviceAvailableNotificationChannels(
+export const serviceAvailableNotificationChannels = (
   retrievedService: RetrievedService
-): ReadonlyArray<NotificationChannel> {
+): ReadonlyArray<NotificationChannel> => {
   if (retrievedService.requireSecureChannels) {
     return [NotificationChannelEnum.WEBHOOK];
   }
   return [NotificationChannelEnum.EMAIL, NotificationChannelEnum.WEBHOOK];
-}
+};
 
 /**
  * Converts a retrieved service to a service that can be shared via API
  */
-function retrievedServiceToPublic(
+const retrievedServiceToPublic = (
   retrievedService: RetrievedService
-): ServicePublic {
-  return {
-    available_notification_channels: serviceAvailableNotificationChannels(
-      retrievedService
-    ),
-    department_name: retrievedService.departmentName,
-    organization_fiscal_code: retrievedService.organizationFiscalCode,
-    organization_name: retrievedService.organizationName,
-    service_id: retrievedService.serviceId,
-    service_metadata: retrievedService.serviceMetadata
-      ? toApiServiceMetadata(retrievedService.serviceMetadata)
-      : undefined,
-    service_name: retrievedService.serviceName,
-    version: retrievedService.version
-  };
-}
+): ServicePublic => ({
+  available_notification_channels: serviceAvailableNotificationChannels(
+    retrievedService
+  ),
+  department_name: retrievedService.departmentName,
+  organization_fiscal_code: retrievedService.organizationFiscalCode,
+  organization_name: retrievedService.organizationName,
+  service_id: retrievedService.serviceId,
+  service_metadata: retrievedService.serviceMetadata
+    ? toApiServiceMetadata(retrievedService.serviceMetadata)
+    : undefined,
+  service_name: retrievedService.serviceName,
+  version: retrievedService.version
+});
 
 const getServiceByRevisionTask = (
   serviceModel: ServiceModel,
   serviceId: ServiceId,
   version: NonNegativeInteger
-) =>
+): TE.TaskEither<
+  CosmosErrors,
+  IResponseErrorNotFound | IResponseSuccessJson<ServicePublic>
+> =>
   pipe(
     serviceModel.findOneByQuery({
       parameters: [
@@ -121,29 +123,30 @@ const getServiceByRevisionTask = (
     )
   );
 
-export function GetServiceByRevisionHandler(
+export const GetServiceByRevisionHandler = (
   serviceModel: ServiceModel
-): IGetServiceByRevisionHandler {
-  return async (serviceId, version) =>
-    pipe(
-      getServiceByRevisionTask(serviceModel, serviceId, version),
-      TE.mapLeft(error =>
-        ResponseErrorQuery("Error while retrieving the service", error)
-      ),
-      TE.toUnion
-    )();
-}
+): IGetServiceByRevisionHandler => async (
+  serviceId,
+  version
+): Promise<IGetServiceByRevisionHandlerRet> =>
+  pipe(
+    getServiceByRevisionTask(serviceModel, serviceId, version),
+    TE.mapLeft(error =>
+      ResponseErrorQuery("Error while retrieving the service", error)
+    ),
+    TE.toUnion
+  )();
 
 /**
  * Wraps a GetService handler inside an Express request handler.
  */
-export function GetServiceByRevision(
+export const GetServiceByRevision = (
   serviceModel: ServiceModel
-): express.RequestHandler {
+): express.RequestHandler => {
   const handler = GetServiceByRevisionHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(
     RequiredParamMiddleware("serviceid", NonEmptyString),
     RequiredParamMiddleware("version", NonNegativeIntegerFromString)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
-}
+};

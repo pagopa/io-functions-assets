@@ -7,16 +7,16 @@ import {
   ResponseSuccessJson
 } from "@pagopa/ts-commons/lib/responses";
 import * as express from "express";
-import * as packageJson from "../package.json";
 
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as packageJson from "../package.json";
 
 import { envConfig, IConfig } from "../utils/config";
 
 interface IInfo {
-  name: string;
-  version: string;
+  readonly name: string;
+  readonly version: string;
 }
 
 type InfoHandler = () => Promise<
@@ -27,30 +27,34 @@ type HealthChecker = (
   config: unknown
 ) => healthcheck.HealthCheck<healthcheck.ProblemSource, true>;
 
-export function InfoHandler(healthCheck: HealthChecker): InfoHandler {
-  return () =>
-    pipe(
-      envConfig,
-      healthCheck,
-      TE.bimap(
-        problems => ResponseErrorInternal(problems.join("\n\n")),
-        _ =>
-          ResponseSuccessJson({
-            name: packageJson.name,
-            version: packageJson.version
-          })
-      ),
-      TE.toUnion
-    )();
-}
+export const InfoHandler = (
+  healthCheck: HealthChecker
+): InfoHandler => (): Promise<
+  IResponseSuccessJson<IInfo> | IResponseErrorInternal
+> =>
+  pipe(
+    envConfig,
+    healthCheck,
+    TE.bimap(
+      problems => ResponseErrorInternal(problems.join("\n\n")),
+      _ =>
+        ResponseSuccessJson({
+          name: packageJson.name,
+          version: packageJson.version
+        })
+    ),
+    TE.toUnion
+  )();
 
-export function Info(): express.RequestHandler {
+export const Info = (): express.RequestHandler => {
   const handler = InfoHandler(
     healthcheck.checkApplicationHealth(IConfig, [
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       c => healthcheck.checkAzureCosmosDbHealth(c.COSMOSDB_URI, c.COSMOSDB_KEY),
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       c => healthcheck.checkAzureStorageHealth(c.CachedStorageConnection)
     ])
   );
 
   return wrapRequestHandler(handler);
-}
+};

@@ -37,37 +37,37 @@ type IGetServiceByLatestRevisionHandler = (
   serviceId: ServiceId
 ) => Promise<IGetServiceByLatestRevisionHandlerRet>;
 
-export function GetServiceByLatestRevisionHandler(
+export const GetServiceByLatestRevisionHandler = (
   serviceModel: ServiceModel
-): IGetServiceByLatestRevisionHandler {
-  return async serviceId =>
-    pipe(
-      serviceModel.findLastVersionByModelId([serviceId]),
-      TE.mapLeft(error =>
-        ResponseErrorQuery("Error while retrieving the service", error)
-      ),
-      TE.chainW(
-        TE.fromOption(() =>
-          ResponseErrorNotFound(
-            "Service not found",
-            "The service you requested was not found in the system."
-          )
+): IGetServiceByLatestRevisionHandler => async (
+  serviceId
+): Promise<IGetServiceByLatestRevisionHandlerRet> =>
+  pipe(
+    serviceModel.findLastVersionByModelId([serviceId]),
+    TE.mapLeft(error =>
+      ResponseErrorQuery("Error while retrieving the service", error)
+    ),
+    TE.chainW(
+      TE.fromOption(() =>
+        ResponseErrorNotFound(
+          "Service not found",
+          "The service you requested was not found in the system."
         )
-      ),
-      TE.map(service => ResponseSuccessJson(retrievedServiceToPublic(service))),
-      TE.toUnion
-    )();
-}
+      )
+    ),
+    TE.map(service => ResponseSuccessJson(retrievedServiceToPublic(service))),
+    TE.toUnion
+  )();
 
 /**
  * Wraps a GetService handler inside an Express request handler.
  */
-export function GetServiceByLatestRevision(
+export const GetServiceByLatestRevision = (
   serviceModel: ServiceModel
-): express.RequestHandler {
+): express.RequestHandler => {
   const handler = GetServiceByLatestRevisionHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(
     RequiredParamMiddleware("serviceid", ServiceId)
   );
   return wrapRequestHandler(middlewaresWrap(handler));
-}
+};

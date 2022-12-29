@@ -116,7 +116,7 @@ stages:
                 !local.settings.json
                 !test
                 !tsconfig.json
-                !tslint.json
+                !.eslintrc.js
                 !yarn.lock
                 !Dangerfile.js
                 !CODEOWNERS

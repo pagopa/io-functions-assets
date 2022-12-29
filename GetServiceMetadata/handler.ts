@@ -26,7 +26,8 @@ import {
 import {
   SERVICE_MODEL_PK_FIELD,
   ServiceMetadata,
-  ServiceModel
+  ServiceModel,
+  RetrievedService
 } from "@pagopa/io-functions-commons/dist/src/models/service";
 
 import { ServiceId } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceId";
@@ -35,6 +36,7 @@ import { toApiServiceMetadata } from "@pagopa/io-functions-commons/dist/src/util
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 type IGetServiceMetadataHandlerRet =
   | IResponseSuccessJson<ServiceMetadata>
@@ -59,7 +61,10 @@ const requiredServiceIdMiddleware = RequiredParamMiddleware(
  * @param serviceId The id of the Service to retrieve
  * @returns
  */
-const findService = (serviceModel: ServiceModel, serviceId: NonEmptyString) =>
+const findService = (
+  serviceModel: ServiceModel,
+  serviceId: NonEmptyString
+): TE.TaskEither<CosmosErrors, O.Option<RetrievedService>> =>
   serviceModel.findOneByQuery(
     {
       parameters: [
@@ -82,44 +87,42 @@ const findService = (serviceModel: ServiceModel, serviceId: NonEmptyString) =>
  * @returns
  */
 
-export function GetServiceMetadataHandler(
+export const GetServiceMetadataHandler = (
   serviceModel: ServiceModel
-): IGetServiceMetadataHandler {
-  return async serviceId =>
-    pipe(
-      findService(serviceModel, serviceId),
-      TE.mapLeft(error =>
-        ResponseErrorQuery("Error while retrieving the service", error)
-      ),
-      TE.map(
-        O.fold(
-          () =>
-            ResponseErrorNotFound(
-              "Service not found",
-              "The service you requested was not found in the system."
-            ),
-          service =>
-            service.serviceMetadata
-              ? ResponseSuccessJson(
-                  toApiServiceMetadata(service.serviceMetadata)
-                )
-              : ResponseErrorNotFound(
-                  "Service metadata not found",
-                  "The service you requested doesn't have metadata attribute."
-                )
-        )
-      ),
-      TE.toUnion
-    )();
-}
+): IGetServiceMetadataHandler => async (
+  serviceId
+): Promise<IGetServiceMetadataHandlerRet> =>
+  pipe(
+    findService(serviceModel, serviceId),
+    TE.mapLeft(error =>
+      ResponseErrorQuery("Error while retrieving the service", error)
+    ),
+    TE.map(
+      O.fold(
+        () =>
+          ResponseErrorNotFound(
+            "Service not found",
+            "The service you requested was not found in the system."
+          ),
+        service =>
+          service.serviceMetadata
+            ? ResponseSuccessJson(toApiServiceMetadata(service.serviceMetadata))
+            : ResponseErrorNotFound(
+                "Service metadata not found",
+                "The service you requested doesn't have metadata attribute."
+              )
+      )
+    ),
+    TE.toUnion
+  )();
 
 /**
  * Wraps a GetService handler inside an Express request handler.
  */
-export function GetServiceMetadata(
+export const GetServiceMetadata = (
   serviceModel: ServiceModel
-): express.RequestHandler {
+): express.RequestHandler => {
   const handler = GetServiceMetadataHandler(serviceModel);
   const middlewaresWrap = withRequestMiddlewares(requiredServiceIdMiddleware);
   return wrapRequestHandler(middlewaresWrap(handler));
-}
+};
