@@ -17,6 +17,11 @@ import * as t from "io-ts";
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.interface({
+    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
+    // the internal function runtime has MaxTelemetryItem per second set to 20 by default
+    // @see https://github.com/Azure/azure-functions-host/blob/master/src/WebJobs.Script/Config/ApplicationInsightsLoggerOptionsSetup.cs#L29
+    APPINSIGHTS_SAMPLING_PERCENTAGE: withDefault(IntegerFromString, 5),
+
     COSMOSDB_KEY: NonEmptyString,
     COSMOSDB_NAME: NonEmptyString,
     COSMOSDB_URI: NonEmptyString,
@@ -25,11 +30,6 @@ export const IConfig = t.intersection([
     SLOT_TASK_HUBNAME: NonEmptyString,
     STATIC_BLOB_ASSETS_ENDPOINT: NonEmptyString,
     STATIC_WEB_ASSETS_ENDPOINT: NonEmptyString,
-
-    APPINSIGHTS_INSTRUMENTATIONKEY: NonEmptyString,
-    // the internal function runtime has MaxTelemetryItem per second set to 20 by default
-    // @see https://github.com/Azure/azure-functions-host/blob/master/src/WebJobs.Script/Config/ApplicationInsightsLoggerOptionsSetup.cs#L29
-    APPINSIGHTS_SAMPLING_PERCENTAGE: withDefault(IntegerFromString, 5),
 
     isProduction: t.boolean
   }),
@@ -50,9 +50,7 @@ const errorOrConfig: t.Validation<IConfig> = IConfig.decode(envConfig);
  *
  * @returns either the configuration values or a list of validation errors
  */
-export function getConfig(): t.Validation<IConfig> {
-  return errorOrConfig;
-}
+export const getConfig = (): t.Validation<IConfig> => errorOrConfig;
 
 /**
  * Read the application configuration and check for invalid values.
@@ -61,11 +59,10 @@ export function getConfig(): t.Validation<IConfig> {
  * @returns the configuration values
  * @throws validation errors found while parsing the application configuration
  */
-export function getConfigOrThrow(): IConfig {
-  return pipe(
+export const getConfigOrThrow = (): IConfig =>
+  pipe(
     errorOrConfig,
     E.getOrElseW(errors => {
       throw new Error(`Invalid configuration: ${readableReport(errors)}`);
     })
   );
-}

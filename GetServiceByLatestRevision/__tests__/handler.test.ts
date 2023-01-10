@@ -1,4 +1,4 @@
-// tslint:disable:no-any
+// eslint-disable no-any
 
 import { toCosmosErrorResponse } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";

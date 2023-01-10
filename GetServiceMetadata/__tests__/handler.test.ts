@@ -1,4 +1,4 @@
-// tslint:disable:no-any
+// eslint-disable no-any
 
 import { none, some } from "fp-ts/lib/Option";
 
