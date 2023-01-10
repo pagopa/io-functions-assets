@@ -128,7 +128,7 @@ export const GetServiceByRevisionHandler = (
 ): IGetServiceByRevisionHandler => async (
   serviceId,
   version
-): Promise<IGetServiceByRevisionHandlerRet> =>
+): ReturnType<IGetServiceByRevisionHandler> =>
   pipe(
     getServiceByRevisionTask(serviceModel, serviceId, version),
     TE.mapLeft(error =>

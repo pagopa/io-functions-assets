@@ -91,7 +91,7 @@ export const GetServiceMetadataHandler = (
   serviceModel: ServiceModel
 ): IGetServiceMetadataHandler => async (
   serviceId
-): Promise<IGetServiceMetadataHandlerRet> =>
+): ReturnType<IGetServiceMetadataHandler> =>
   pipe(
     findService(serviceModel, serviceId),
     TE.mapLeft(error =>

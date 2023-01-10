@@ -41,7 +41,7 @@ export const GetServiceByLatestRevisionHandler = (
   serviceModel: ServiceModel
 ): IGetServiceByLatestRevisionHandler => async (
   serviceId
-): Promise<IGetServiceByLatestRevisionHandlerRet> =>
+): ReturnType<IGetServiceByLatestRevisionHandler> =>
   pipe(
     serviceModel.findLastVersionByModelId([serviceId]),
     TE.mapLeft(error =>

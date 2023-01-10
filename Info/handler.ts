@@ -29,9 +29,7 @@ type HealthChecker = (
 
 export const InfoHandler = (
   healthCheck: HealthChecker
-): InfoHandler => (): Promise<
-  IResponseSuccessJson<IInfo> | IResponseErrorInternal
-> =>
+): InfoHandler => (): ReturnType<InfoHandler> =>
   pipe(
     envConfig,
     healthCheck,
