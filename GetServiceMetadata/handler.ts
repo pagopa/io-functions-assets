@@ -23,9 +23,10 @@ import {
   ResponseErrorQuery
 } from "@pagopa/io-functions-commons/dist/src/utils/response";
 
+import { ServiceMetadata as ApiServiceMetadata } from "@pagopa/io-functions-commons/dist/generated/definitions/ServiceMetadata";
+
 import {
   SERVICE_MODEL_PK_FIELD,
-  ServiceMetadata,
   ServiceModel,
   RetrievedService
 } from "@pagopa/io-functions-commons/dist/src/models/service";
@@ -39,7 +40,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 
 type IGetServiceMetadataHandlerRet =
-  | IResponseSuccessJson<ServiceMetadata>
+  | IResponseSuccessJson<ApiServiceMetadata>
   | IResponseErrorNotFound
   | IResponseErrorQuery;
 
