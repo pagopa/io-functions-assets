@@ -28,8 +28,6 @@
     "@types/jest": "^24.0.15",
     "@types/lolex": "^3.1.1",
     "auto-changelog": "^2.2.1",
-    "danger": "^4.0.2",
-    "danger-plugin-digitalcitizenship": "^0.3.1",
     "dotenv-cli": "^3.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "fast-check": "^1.16.0",
