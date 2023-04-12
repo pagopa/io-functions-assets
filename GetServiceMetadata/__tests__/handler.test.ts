@@ -23,6 +23,7 @@ import { ServiceScopeEnum } from "@pagopa/io-functions-commons/dist/generated/de
 import * as TE from "fp-ts/lib/TaskEither";
 import { aCosmosResourceMetadata } from "../../__mocks__/mocks";
 import { GetServiceMetadataHandler } from "../handler";
+import { StandardServiceCategoryEnum } from "@pagopa/io-functions-commons/dist/generated/definitions/StandardServiceCategory";
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -30,8 +31,10 @@ afterEach(() => {
 });
 
 const anOrganizationFiscalCode = "01234567890" as OrganizationFiscalCode;
-const aServiceMetadata = {
-  scope: ServiceScopeEnum.NATIONAL
+const aServiceMetadata: ServiceMetadata = {
+  scope: ServiceScopeEnum.NATIONAL,
+  category: StandardServiceCategoryEnum.STANDARD,
+  customSpecialFlow: undefined
 };
 const aLowerCaseServiceId = "mysubscriptionid" as NonEmptyString;
 const anUpperCaseServiceId = "MYSUBSCRIPTIONID" as NonEmptyString;
