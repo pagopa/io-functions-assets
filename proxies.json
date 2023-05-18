@@ -105,6 +105,13 @@
         "route": "/assistanceTools/{*path}"
       },
       "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/assistanceTools/{path}"
+    },
+    "sign":{
+      "matchCondition": {
+        "methods": ["GET"],
+        "route": "/sign/{*path}"
+      },
+      "backendUri": "https://%STATIC_WEB_ASSETS_ENDPOINT%/sign/{path}"
     }
   }
 }
