@@ -11,12 +11,10 @@ on:
   push:
     branches:
       - EC-403-devops-decommissioning
-      
+
 jobs:
   js_code_review:
     runs-on: ubuntu-22.04
-    env:
-      ENVIRONMENT: 'prod-ci'
 
     steps:
       - name: Check-out code
@@ -49,9 +47,6 @@ jobs:
 
       - name: Lint
         run: yarn lint
-
-      - name: Generate models
-        run: yarn generate
 
       - name: Validate API specification
         run: npx oval validate -p openapi/index.yaml
