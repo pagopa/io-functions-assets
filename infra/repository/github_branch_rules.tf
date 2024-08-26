@@ -8,7 +8,7 @@ resource "github_branch_protection" "protection_master" {
   pattern       = "master"
 
   required_status_checks {
-    strict   = false
+    strict = false
     contexts = [
       "io-functions-assets.code-review",
     ]
