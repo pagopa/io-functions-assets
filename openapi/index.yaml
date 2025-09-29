@@ -1,0 +1,38 @@
+swagger: "2.0"
+info:
+  version: 0.0.1
+  title: IO API for Public assets
+  contact:
+    name: Digital Transformation Team
+    url: https://forum.italia.it/c/progetto-io
+  x-logo:
+    url: https://io.italia.it/assets/img/io-logo-blue.svg
+  description: >
+    # Warning
+    **This is an experimental API that is (most probably) going to change as we evolve the IO platform.**
+    # Introduction
+    This is the documentation of the IO API for App.
+host: api.cd.italia.it
+basePath: "/api/v1"
+schemes:
+  - https
+paths:
+  "/info":
+    get:
+      operationId: info
+      summary: info.
+      description: |-
+        Info
+      tags:
+        - restricted
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "429":
+          description: Too many requests
+consumes:
+  - application/json
+produces:
+  - application/json
